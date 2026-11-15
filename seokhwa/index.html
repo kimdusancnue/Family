@@ -1,0 +1,2289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="theme-color" content="#8fd0f0">
+<meta name="description" content="홍천 석화초등학교를 3D 웹으로 걸어 다니는 메타버스. 정문·운동장·본관 교실·복도·엘리베이터·참빛관 체육관.">
+<title>홍천 석화초등학교 3D 메타버스</title>
+<style>
+:root{
+  --green:#2f9e62; --green-d:#1f7a4a; --green-l:#8be0a8;
+  --sky:#8fd0f0; --ink:#22302a; --ink-soft:#4b6157;
+  --panel:rgba(255,255,255,.93); --panel-b:rgba(255,255,255,.72);
+  --shadow:0 6px 22px rgba(20,60,45,.18);
+  --yellow:#ffc247;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#bfe6f7;
+  font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR','Nanum Gothic',system-ui,sans-serif;
+  color:var(--ink);-webkit-user-select:none;user-select:none;overscroll-behavior:none;}
+canvas{display:block}
+#stage{position:fixed;inset:0;touch-action:none;}
+.hidden{display:none !important;}
+
+/* ---------- top bar ---------- */
+#titleBar{position:fixed;top:calc(10px + env(safe-area-inset-top));left:12px;display:flex;gap:8px;align-items:center;
+  padding:8px 14px 8px 10px;background:var(--panel);border-radius:16px;box-shadow:var(--shadow);
+  backdrop-filter:blur(6px);z-index:20;pointer-events:none;max-width:calc(100vw - 150px);}
+#titleBar .logo{font-size:22px;line-height:1}
+#titleBar .tt{display:flex;flex-direction:column;line-height:1.15}
+#titleBar .tt b{font-size:14px;letter-spacing:-.2px}
+#titleBar .tt span{font-size:11px;color:var(--ink-soft)}
+
+/* ---------- warp panel ---------- */
+#warpWrap{position:fixed;top:calc(10px + env(safe-area-inset-top));right:10px;z-index:22;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+#warpToggle{display:flex;align-items:center;gap:6px;border:0;cursor:pointer;font:inherit;font-size:13px;font-weight:700;
+  color:#fff;background:var(--green);padding:10px 14px;border-radius:14px;box-shadow:var(--shadow);}
+#warpToggle:active{transform:scale(.97)}
+#warpPanel{width:214px;background:var(--panel);border-radius:16px;box-shadow:var(--shadow);padding:10px;backdrop-filter:blur(6px);
+  max-height:min(74vh,620px);overflow:auto;}
+#warpPanel h4{margin:2px 4px 8px;font-size:12px;color:var(--ink-soft);font-weight:700;letter-spacing:-.2px}
+.warpBtn{display:flex;align-items:center;gap:8px;width:100%;border:0;cursor:pointer;font:inherit;font-size:13px;font-weight:600;
+  color:var(--ink);background:#f2f7f3;padding:9px 10px;border-radius:11px;margin-bottom:6px;text-align:left;}
+.warpBtn:hover{background:#e4f2e8}
+.warpBtn:active{transform:scale(.985)}
+.warpBtn .ic{font-size:15px}
+#mapBox{margin-top:4px;background:#eef6ea;border-radius:12px;padding:6px}
+#minimap{width:100%;height:auto;display:block;border-radius:8px}
+#mapHint{font-size:10px;color:var(--ink-soft);text-align:center;margin-top:4px}
+
+/* ---------- prompt / toast ---------- */
+#prompt{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(120px + env(safe-area-inset-bottom));z-index:18;
+  display:flex;align-items:center;gap:8px;padding:9px 16px;background:rgba(34,48,42,.86);color:#fff;border-radius:999px;
+  font-size:13px;font-weight:600;box-shadow:0 8px 20px rgba(0,0,0,.22);pointer-events:none;opacity:0;transition:opacity .18s;}
+#prompt.on{opacity:1}
+#prompt .key{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;
+  background:var(--yellow);color:#4a3300;border-radius:6px;font-size:12px;font-weight:800}
+#toast{position:fixed;left:50%;transform:translateX(-50%) translateY(8px);bottom:calc(172px + env(safe-area-inset-bottom));z-index:19;
+  max-width:min(88vw,560px);padding:12px 18px;background:rgba(255,255,255,.97);border:2px solid var(--green-l);border-radius:16px;
+  font-size:14px;line-height:1.5;box-shadow:var(--shadow);opacity:0;transition:opacity .25s, transform .25s;pointer-events:none;}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast b{color:var(--green-d)}
+#toast .bubbleTail{position:absolute;left:50%;bottom:-9px;width:16px;height:16px;background:rgba(255,255,255,.97);
+  border-right:2px solid var(--green-l);border-bottom:2px solid var(--green-l);transform:translateX(-50%) rotate(45deg);}
+
+/* ---------- elevator panel ---------- */
+#elevPanel{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(28px + env(safe-area-inset-bottom));z-index:21;
+  background:var(--panel);border-radius:20px;box-shadow:var(--shadow);padding:14px 16px 12px;width:min(300px,86vw);text-align:center;}
+#elevPanel .eh{display:flex;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:14px;margin-bottom:2px}
+#elevDisp{font-family:ui-monospace,Menlo,monospace;font-size:26px;font-weight:800;color:var(--green-d);letter-spacing:1px;margin:2px 0 8px}
+#elevDisp small{font-size:11px;color:var(--ink-soft);font-weight:700;margin-left:6px;letter-spacing:0}
+.elevRow{display:flex;gap:8px;justify-content:center}
+.elevBtn{flex:1;border:0;cursor:pointer;font:inherit;font-weight:800;font-size:14px;padding:12px 0;border-radius:13px;
+  background:#eaf3ec;color:var(--ink);transition:transform .1s,background .2s}
+.elevBtn.cur{background:var(--green);color:#fff}
+.elevBtn:active{transform:scale(.96)}
+#elevNote{font-size:11px;color:var(--ink-soft);margin-top:9px;line-height:1.4}
+
+/* ---------- joystick + touch buttons ---------- */
+#joyZone{position:fixed;left:16px;bottom:calc(20px + env(safe-area-inset-bottom));width:132px;height:132px;z-index:20;touch-action:none}
+#joyBase{position:absolute;inset:0;border-radius:50%;background:rgba(255,255,255,.42);border:2px solid rgba(255,255,255,.85);
+  box-shadow:inset 0 0 22px rgba(47,158,98,.18), 0 4px 14px rgba(20,60,45,.15)}
+#joyKnob{position:absolute;left:50%;top:50%;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;
+  background:radial-gradient(circle at 38% 34%,#ffffff,#c9ead7 70%);border:2px solid #ffffff;box-shadow:0 4px 12px rgba(20,60,45,.25)}
+#touchBtns{position:fixed;right:16px;bottom:calc(24px + env(safe-area-inset-bottom));z-index:20;display:flex;flex-direction:column;gap:10px;align-items:center}
+.tbtn{width:62px;height:62px;border-radius:50%;border:0;cursor:pointer;font:inherit;font-size:22px;font-weight:800;color:#fff;
+  background:rgba(47,158,98,.92);box-shadow:0 5px 16px rgba(20,60,45,.28);display:flex;align-items:center;justify-content:center;touch-action:none}
+.tbtn.sec{width:52px;height:52px;font-size:17px;background:rgba(255,255,255,.92);color:var(--green-d)}
+.tbtn:active{transform:scale(.94)}
+.tbtn .lbl{font-size:10px;font-weight:800;letter-spacing:-.3px}
+
+/* ---------- hint card ---------- */
+#hint{position:fixed;left:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:17;max-width:330px;background:var(--panel);
+  border-radius:14px;padding:11px 14px;box-shadow:var(--shadow);font-size:12px;line-height:1.65;color:var(--ink-soft);
+  transition:opacity .5s;}
+#hint b{color:var(--ink)}
+#hint.gone{opacity:0;pointer-events:none}
+#hint .kbd{display:inline-block;padding:1px 5px;border-radius:5px;background:#eef3ef;border:1px solid #d5e2d8;color:#2b3f36;font-size:11px;font-weight:700}
+
+/* ---------- loading / error / fade ---------- */
+#loading{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  background:linear-gradient(160deg,#c9ecfb,#eaf8e6 55%,#fdf6df);transition:opacity .5s}
+#loading.gone{opacity:0;pointer-events:none}
+#loading .spin{width:52px;height:52px;border-radius:50%;border:5px solid rgba(47,158,98,.22);border-top-color:var(--green);
+  animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#loading .lt{font-size:15px;font-weight:800}
+#loading .ls{font-size:12px;color:var(--ink-soft)}
+#err{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;padding:24px;background:#f6f8f7}
+#err .card{max-width:420px;background:#fff;border-radius:18px;padding:22px;box-shadow:var(--shadow);text-align:center;font-size:14px;line-height:1.6}
+#fade{position:fixed;inset:0;z-index:40;background:#0d1a14;opacity:0;pointer-events:none;transition:opacity .28s}
+#fade.on{opacity:1}
+#viewBtn{position:fixed;right:10px;top:calc(10px + env(safe-area-inset-top));transform:translateY(52px);z-index:22;display:none}
+
+@media (max-width:520px){
+  #titleBar{padding:6px 11px 6px 8px;border-radius:14px}
+  #titleBar .tt b{font-size:12.5px}
+  #titleBar .tt span{font-size:10px}
+  #warpPanel{width:196px}
+  #hint{display:none}
+}
+@media (min-width:900px){
+  #hint{max-width:360px}
+}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+
+<div id="titleBar">
+  <div class="logo">🏫</div>
+  <div class="tt"><b>홍천 석화초등학교</b><span>3D 메타버스 · 걸어서 둘러보기</span></div>
+</div>
+
+<div id="warpWrap">
+  <div style="display:flex;gap:6px">
+    <button id="viewBtn2" class="warpBtn" style="background:var(--panel);box-shadow:var(--shadow);margin:0;width:auto;padding:10px 12px" title="시점 전환">👁 3인칭</button>
+    <button id="warpToggle">🧭 바로가기</button>
+  </div>
+  <div id="warpPanel" class="hidden">
+    <h4>빠른 이동</h4>
+    <div id="warpList"></div>
+    <div id="mapBox"><canvas id="minimap" width="380" height="340"></canvas><div id="mapHint">미니맵 · 내 위치</div></div>
+  </div>
+</div>
+
+<div id="prompt"><span class="key">E</span><span id="promptTxt">안내</span></div>
+<div id="toast"><div class="bubbleTail"></div><div id="toastTxt"></div></div>
+
+<div id="elevPanel" class="hidden">
+  <div class="eh">🛗 <span>엘리베이터</span></div>
+  <div id="elevDisp">1F<small>탑승 중</small></div>
+  <div class="elevRow" id="elevRow"></div>
+  <div id="elevNote">버튼을 누르면 문이 닫히고 이동합니다.<br>도착하면 문이 열리고 복도로 나갈 수 있어요.</div>
+</div>
+
+<div id="joyZone" class="hidden"><div id="joyBase"></div><div id="joyKnob"></div></div>
+<div id="touchBtns" class="hidden">
+  <button class="tbtn sec" id="btnView" title="시점">👁</button>
+  <button class="tbtn" id="btnJump" title="점프">⤒</button>
+  <button class="tbtn" id="btnAct" title="상호작용"><span class="lbl">E</span></button>
+</div>
+
+<div id="hint">
+  <b>이동</b> <span class="kbd">W A S D</span> / 방향키 &nbsp;·&nbsp; <b>시점</b> 마우스 드래그 &nbsp;·&nbsp; <b>점프</b> <span class="kbd">Space</span><br>
+  <b>상호작용</b> <span class="kbd">E</span> &nbsp;·&nbsp; <b>시점 전환</b> <span class="kbd">V</span><br>
+  엘리베이터를 타고 2·3층 교실까지 올라가 보세요! 🛗
+</div>
+
+<div id="fade"></div>
+<div id="loading">
+  <div class="spin"></div>
+  <div class="lt">석화초 3D 메타버스 준비 중…</div>
+  <div class="ls">운동장과 교실을 짓고 있어요 🏫</div>
+</div>
+<div id="err" class="hidden"><div class="card" id="errCard"></div></div>
+
+<script>
+/* 오류 수집 (검증용) */
+window.__errors = [];
+window.addEventListener('error', function (e) {
+  try { window.__errors.push(String((e && (e.message || e.error)) || e)); } catch (x) {}
+});
+</script>
+<script>
+function boot(){
+  "use strict";
+  var T = THREE;
+
+  /* =====================================================================
+     0. 기본값 · 도우미
+  ===================================================================== */
+  var $ = function (id) { return document.getElementById(id); };
+  var clamp = function (v, a, b) { return v < a ? a : (v > b ? b : v); };
+  var lerp = function (a, b, t) { return a + (b - a) * t; };
+  var KFONT = '"Noto Sans KR","Noto Sans CJK KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif';
+
+  var FLOOR_H = 4.0;          // 층고
+  var CEIL = 3.4;             // 천장 높이
+  var B = { x1: -36, x2: 36, z1: -30, z2: -10 };      // 본관 외곽
+  var G = { x1: 42, x2: 62, z1: -34, z2: -6 };        // 참빛관 외곽
+  var PITCH = { x1: -26, x2: 26, z1: 4, z2: 40 };     // 축구장
+  var TRACK = { x1: -34, x2: 34, z1: -4, z2: 46 };    // 트랙 외곽
+  var CAMPUS = { x1: -60, x2: 60, z1: -48, z2: 52 };  // 울타리
+
+  function rnd(seed) { var s = seed || 1; return function () { s = (s * 1103515245 + 12345) % 2147483648; return s / 2147483648; }; }
+
+  function cvs(w, h) { var c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+
+  function texFrom(canvas, repX, repY) {
+    var t = new T.CanvasTexture(canvas);
+    t.colorSpace = T.SRGBColorSpace;
+    t.anisotropy = 8;
+    if (repX || repY) { t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(repX || 1, repY || 1); }
+    return t;
+  }
+
+  function rr(g, x1, z1, x2, z2, r) {
+    g.beginPath();
+    g.moveTo(x1 + r, z1);
+    g.lineTo(x2 - r, z1); g.quadraticCurveTo(x2, z1, x2, z1 + r);
+    g.lineTo(x2, z2 - r); g.quadraticCurveTo(x2, z2, x2 - r, z2);
+    g.lineTo(x1 + r, z2); g.quadraticCurveTo(x1, z2, x1, z2 - r);
+    g.lineTo(x1, z1 + r); g.quadraticCurveTo(x1, z1, x1 + r, z1);
+    g.closePath();
+  }
+
+  function mergeGeoms(list) {
+    var pos = [], norm = [], uv = [];
+    for (var i = 0; i < list.length; i++) {
+      var g = list[i].index ? list[i].toNonIndexed() : list[i];
+      var pa = g.attributes.position.array, na = g.attributes.normal.array;
+      for (var k = 0; k < pa.length; k++) { pos.push(pa[k]); norm.push(na[k]); }
+      if (g.attributes.uv) { var ua = g.attributes.uv.array; for (var j = 0; j < ua.length; j++) uv.push(ua[j]); }
+    }
+    var out = new T.BufferGeometry();
+    out.setAttribute('position', new T.Float32BufferAttribute(pos, 3));
+    out.setAttribute('normal', new T.Float32BufferAttribute(norm, 3));
+    if (uv.length) out.setAttribute('uv', new T.Float32BufferAttribute(uv, 2));
+    return out;
+  }
+  function bg(w, h, d, x, y, z) { var g = new T.BoxGeometry(w, h, d); g.translate(x, y, z); return g; }
+
+  /* =====================================================================
+     1. 렌더러 · 장면 · 조명 · 하늘
+  ===================================================================== */
+  var LOWQ = /(\?|&)q=low/.test(location.search);
+  var renderer = new T.WebGLRenderer({ antialias: !LOWQ, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(LOWQ ? 1 : Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = !LOWQ;
+  renderer.shadowMap.type = T.PCFSoftShadowMap;
+  if (T.SRGBColorSpace) renderer.outputColorSpace = T.SRGBColorSpace;
+  $('stage').appendChild(renderer.domElement);
+
+  var scene = new T.Scene();
+  scene.fog = new T.Fog(0xd8eefb, 150, 340);
+
+  var camera = new T.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.1, 900);
+
+  /* 하늘 (그라데이션 + 구름) */
+  (function () {
+    var c = cvs(1024, 512), g = c.getContext('2d');
+    var grd = g.createLinearGradient(0, 0, 0, 512);
+    grd.addColorStop(0, '#5fb3e8'); grd.addColorStop(0.45, '#a8d9f4');
+    grd.addColorStop(0.72, '#e5f4fb'); grd.addColorStop(1, '#f6fbf3');
+    g.fillStyle = grd; g.fillRect(0, 0, 1024, 512);
+    var R = rnd(7);
+    for (var i = 0; i < 26; i++) {
+      var x = R() * 1024, y = 60 + R() * 210, s = 26 + R() * 60;
+      g.globalAlpha = 0.5 + R() * 0.4; g.fillStyle = '#ffffff';
+      g.beginPath();
+      g.ellipse(x, y, s * 1.7, s * 0.62, 0, 0, Math.PI * 2);
+      g.ellipse(x + s * 0.8, y - s * 0.22, s * 1.05, s * 0.5, 0, 0, Math.PI * 2);
+      g.ellipse(x - s * 0.85, y + s * 0.05, s * 0.95, s * 0.45, 0, 0, Math.PI * 2);
+      g.fill();
+    }
+    g.globalAlpha = 1;
+    var t = texFrom(c);
+    var sky = new T.Mesh(new T.SphereGeometry(520, 32, 20), new T.MeshBasicMaterial({ map: t, side: T.BackSide, fog: false }));
+    scene.add(sky);
+  })();
+
+  scene.add(new T.HemisphereLight(0xd7ecff, 0x8fbd72, 0.85));
+  scene.add(new T.AmbientLight(0xffffff, 0.42));
+
+  var sun = new T.DirectionalLight(0xfff4df, 1.05);
+  sun.position.set(58, 96, 62);
+  sun.castShadow = true;
+  sun.shadow.mapSize.width = 1024;
+  sun.shadow.mapSize.height = 1024;
+  sun.shadow.camera.near = 20; sun.shadow.camera.far = 260;
+  sun.shadow.camera.left = -80; sun.shadow.camera.right = 80;
+  sun.shadow.camera.top = 80; sun.shadow.camera.bottom = -80;
+  sun.shadow.bias = -0.0009;
+  sun.shadow.normalBias = 0.035;
+  scene.add(sun);
+  scene.add(sun.target);
+  sun.target.position.set(0, 0, 8);
+
+  var fill = new T.DirectionalLight(0xbfe0ff, 0.28);
+  fill.position.set(-60, 50, -70);
+  scene.add(fill);
+
+  /* =====================================================================
+     2. 재질
+  ===================================================================== */
+  function std(color, rough, metal) {
+    return new T.MeshStandardMaterial({ color: color, roughness: rough === undefined ? 0.9 : rough, metalness: metal || 0 });
+  }
+  var MAT = {
+    wall: std(0xf7f0e2, 0.95),
+    wall2: std(0xefe5d4, 0.95),
+    trim: std(0xffffff, 0.8),
+    band: std(0x6ec1e4, 0.75),
+    band2: std(0x63b8ab, 0.8),
+    bandWarm: std(0xffc247, 0.8),
+    roof: std(0x8d9aa6, 0.9),
+    ceil: new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95, emissive: 0xcfcfc8, emissiveIntensity: 0.42 }),
+    roofDark: std(0x6c7a86, 0.9),
+    concrete: std(0xdedbd2, 0.95),
+    brick: std(0xb98a6b, 0.95),
+    steel: std(0xb9c6cf, 0.55, 0.35),
+    darkSteel: std(0x6f7c86, 0.6, 0.3),
+    wood: std(0xc8a06a, 0.9),
+    woodLight: std(0xe3c99c, 0.9),
+    desk: std(0xe0b978, 0.85),
+    desk2: std(0x8fc7d8, 0.8),
+    green: std(0x4fa86a, 0.9),
+    hedge: std(0x4f9b52, 0.95),
+    leaf: std(0x57a45c, 0.95),
+    leafDark: std(0x3d7f47, 0.95),
+    trunk: std(0x8a6244, 0.95),
+    white: std(0xffffff, 0.8),
+    red: std(0xd0534a, 0.85),
+    door: std(0x9fb7c4, 0.75),
+    elevator: std(0xa9b7c1, 0.6, 0.25),
+    elevDoor: std(0xc2ced6, 0.5, 0.4),
+    elevFloor: std(0x5d6b74, 0.8),
+    court: std(0xd9b877, 0.85),
+    stage: std(0x8a5a4a, 0.9),
+    curtain: std(0x9c3f4b, 0.95),
+    soil: std(0x8a6a4e, 1),
+    glass: new T.MeshStandardMaterial({ color: 0xbfe6f5, roughness: 0.1, metalness: 0.1, transparent: true, opacity: 0.32, side: T.DoubleSide }),
+    glassDoor: new T.MeshStandardMaterial({ color: 0xcfeefb, roughness: 0.1, metalness: 0.1, transparent: true, opacity: 0.42, side: T.DoubleSide })
+  };
+
+  /* =====================================================================
+     3. 지면 텍스처 (운동장·트랙·화단·통행로를 한 장에 그림)
+  ===================================================================== */
+  function drawCampus() {
+    var W = 2048, H = 1792, S = W / 128;      // 16 px / m
+    var c = cvs(W, H), g = c.getContext('2d');
+    g.setTransform(S, 0, 0, S, 64 * S, 56 * S);   // 월드 좌표(미터)로 그리기: x→오른쪽, z→아래
+    var R = rnd(20241115);
+
+    // 잔디 바탕
+    g.fillStyle = '#7cbf66'; g.fillRect(-64, -56, 128, 112);
+    for (var i = 0; i < 3600; i++) {
+      var x = -64 + R() * 128, z = -56 + R() * 112;
+      g.globalAlpha = 0.10 + R() * 0.16;
+      g.fillStyle = R() > 0.5 ? '#8fd07a' : '#6aae59';
+      g.beginPath(); g.ellipse(x, z, 0.7 + R() * 2.6, 0.5 + R() * 1.6, R() * 3, 0, Math.PI * 2); g.fill();
+    }
+    g.globalAlpha = 1;
+
+    // ---- 우레탄 트랙 (둥근 사각 링) ----
+    g.fillStyle = '#b9564b';
+    rr(g, TRACK.x1, TRACK.z1, TRACK.x2, TRACK.z2, 15);
+    g.fill();
+    g.save();
+    g.beginPath(); rr(g, TRACK.x1, TRACK.z1, TRACK.x2, TRACK.z2, 15);
+    g.clip();
+    g.fillStyle = 'rgba(0,0,0,0.10)';
+    rr(g, TRACK.x1, TRACK.z1, TRACK.x2, TRACK.z1 + 4, 14); g.fill();
+    g.restore();
+    // 차선
+    g.strokeStyle = '#ffffff'; g.lineWidth = 0.12; g.globalAlpha = 0.85;
+    for (var L = 1; L <= 5; L++) {
+      var k = L / 6;
+      rr(g, lerp(TRACK.x1, PITCH.x1, k), lerp(TRACK.z1, PITCH.z1, k), lerp(TRACK.x2, PITCH.x2, k), lerp(TRACK.z2, PITCH.z2, k), 15 - k * 6);
+      g.stroke();
+    }
+    g.globalAlpha = 1;
+
+    // ---- 잔디 축구장 ----
+    g.fillStyle = '#79c065';
+    g.fillRect(PITCH.x1, PITCH.z1, PITCH.x2 - PITCH.x1, PITCH.z2 - PITCH.z1);
+    var bands = 9, bh = (PITCH.z2 - PITCH.z1) / bands;
+    for (var b = 0; b < bands; b++) {
+      if (b % 2 === 0) { g.fillStyle = '#71b95e'; g.fillRect(PITCH.x1, PITCH.z1 + b * bh, PITCH.x2 - PITCH.x1, bh); }
+    }
+    g.strokeStyle = '#ffffff'; g.lineWidth = 0.16; g.globalAlpha = 0.92;
+    g.strokeRect(PITCH.x1 + 0.6, PITCH.z1 + 0.6, (PITCH.x2 - PITCH.x1) - 1.2, (PITCH.z2 - PITCH.z1) - 1.2);
+    var cx = (PITCH.x1 + PITCH.x2) / 2, cz = (PITCH.z1 + PITCH.z2) / 2;
+    g.beginPath(); g.moveTo(PITCH.x1 + 0.6, cz); g.lineTo(PITCH.x2 - 0.6, cz); g.stroke();
+    g.beginPath(); g.arc(cx, cz, 7, 0, Math.PI * 2); g.stroke();
+    g.beginPath(); g.arc(cx, cz, 0.5, 0, Math.PI * 2); g.fillStyle = '#ffffff'; g.fill();
+    // 페널티 박스
+    g.strokeRect(cx - 12, PITCH.z1 + 0.6, 24, 7.5);
+    g.strokeRect(cx - 12, PITCH.z2 - 8.1, 24, 7.5);
+    g.strokeRect(cx - 5, PITCH.z1 + 0.6, 10, 3.2);
+    g.strokeRect(cx - 5, PITCH.z2 - 3.8, 10, 3.2);
+    // 코너 아크
+    g.beginPath(); g.arc(PITCH.x1 + 0.6, PITCH.z1 + 0.6, 1.2, 0, Math.PI / 2); g.stroke();
+    g.beginPath(); g.arc(PITCH.x2 - 0.6, PITCH.z2 - 0.6, 1.2, Math.PI, Math.PI * 1.5); g.stroke();
+    g.globalAlpha = 1;
+
+    // ---- 바닥 포장 (보도블럭) ----
+    function pave(x1, z1, x2, z2) {
+      g.fillStyle = '#d9d3c6'; g.fillRect(x1, z1, x2 - x1, z2 - z1);
+      g.strokeStyle = 'rgba(0,0,0,0.10)'; g.lineWidth = 0.05;
+      for (var px = x1; px <= x2; px += 1.2) { g.beginPath(); g.moveTo(px, z1); g.lineTo(px, z2); g.stroke(); }
+      for (var pz = z1; pz <= z2; pz += 1.2) { g.beginPath(); g.moveTo(x1, pz); g.lineTo(x2, pz); g.stroke(); }
+    }
+    // 본관 앞 광장
+    pave(-30, -10, 30, -4);
+    // 정문 ~ 운동장 진입로
+    pave(-5.2, 45, 5.2, 52.5);
+    pave(-9, 40, 9, 45);
+    // 후문 통학로
+    pave(-4.5, -48.5, 4.5, -30);
+    // 본관 ↔ 참빛관 사이 길
+    pave(34, -34, 42, -6);
+    // 동쪽 순환로
+    pave(30, -6, 34, -4);
+    // 서쪽 순환로
+    pave(-34, -6, -30, -4);
+    // 외곽 산책로
+    pave(-58, 48, 58, 51);
+    pave(56, -46, 58, 51);
+    pave(-58, -46, -56, 51);
+
+    // ---- 화단 (교화 장미 · 교목 향나무 자리) ----
+    function bed(x1, z1, x2, z2, seed) {
+      g.fillStyle = '#7a6047'; g.fillRect(x1, z1, x2 - x1, z2 - z1);
+      g.strokeStyle = '#a08a6c'; g.lineWidth = 0.12; g.strokeRect(x1, z1, x2 - x1, z2 - z1);
+      var RR = rnd(seed);
+      for (var i2 = 0; i2 < (x2 - x1) * (z2 - z1) * 2.2; i2++) {
+        var fx = x1 + 0.3 + RR() * (x2 - x1 - 0.6), fz = z1 + 0.3 + RR() * (z2 - z1 - 0.6);
+        g.fillStyle = RR() > 0.35 ? '#e2566d' : '#f2b6c4';
+        g.beginPath(); g.arc(fx, fz, 0.16 + RR() * 0.13, 0, Math.PI * 2); g.fill();
+        g.fillStyle = '#3d7f47'; g.globalAlpha = 0.5;
+        g.beginPath(); g.arc(fx + 0.22, fz + 0.2, 0.14, 0, Math.PI * 2); g.fill(); g.globalAlpha = 1;
+      }
+    }
+    bed(-26, -12.2, -8, -10.6, 3);
+    bed(8, -12.2, 26, -10.6, 5);
+    bed(-13, 49.6, -7.6, 52, 7);
+    bed(7.6, 49.6, 13, 52, 9);
+    bed(-58, -30, -46, -18, 11);   // 서쪽 텃밭
+    bed(46, 2, 58, 12, 13);
+
+    // ---- 그림자 느낌의 흙길 ----
+    g.globalAlpha = 0.08; g.fillStyle = '#3c5a33';
+    g.fillRect(TRACK.x1 - 1, TRACK.z1 - 1, TRACK.x2 - TRACK.x1 + 2, 1.2);
+    g.globalAlpha = 1;
+    return c;
+  }
+
+  var campusTex = texFrom(drawCampus());
+  var ground = new T.Mesh(new T.PlaneGeometry(128, 112), new T.MeshStandardMaterial({ map: campusTex, roughness: 0.96 }));
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.set(0, 0, 0);
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // 캠퍼스 밖 넓은 들판 + 먼 산
+  (function () {
+    var outer = new T.Mesh(new T.PlaneGeometry(900, 900), std(0x8cc47a, 1));
+    outer.rotation.x = -Math.PI / 2; outer.position.y = -0.08; outer.receiveShadow = false;
+    scene.add(outer);
+    var R = rnd(31);
+    for (var i = 0; i < 26; i++) {
+      var a = (i / 26) * Math.PI * 2 + R() * 0.14;
+      var rad = 190 + R() * 90;
+      var h = 22 + R() * 46;
+      var m = new T.Mesh(new T.ConeGeometry(34 + R() * 34, h, 6), std(R() > 0.5 ? 0x6fa37c : 0x7bae87, 1));
+      m.position.set(Math.cos(a) * rad, h / 2 - 1, Math.sin(a) * rad);
+      m.rotation.y = R() * 3;
+      scene.add(m);
+    }
+    // 캠퍼스 담장 밖 가로수
+    for (var k = 0; k < 34; k++) {
+      var side = k % 4;
+      var t = new T.Mesh(new T.ConeGeometry(2.2, 7 + R() * 3, 6), MAT.leafDark);
+      var px, pz;
+      if (side === 0) { px = -66 - R() * 12; pz = -50 + R() * 104; }
+      else if (side === 1) { px = 66 + R() * 12; pz = -50 + R() * 104; }
+      else if (side === 2) { px = -60 + R() * 120; pz = 56 + R() * 10; }
+      else { px = -60 + R() * 120; pz = -54 - R() * 10; }
+      t.position.set(px, 3.5, pz); scene.add(t);
+    }
+  })();
+
+  /* =====================================================================
+     4. 오브젝트 도우미
+  ===================================================================== */
+  var colliders = [[], [], []];         // 0: 지상(1층+야외) 1: 2층 2: 3층
+  var occluders = [[], [], []];         // 카메라 충돌용 AABB
+  function collider(lv, x1, x2, z1, z2) {
+    var b = { x1: Math.min(x1, x2), x2: Math.max(x1, x2), z1: Math.min(z1, z2), z2: Math.max(z1, z2) };
+    colliders[lv].push(b);
+    occluders[lv].push(new T.Box3(new T.Vector3(b.x1, lv * FLOOR_H, b.z1), new T.Vector3(b.x2, lv * FLOOR_H + CEIL + 0.6, b.z2)));
+  }
+  function mesh(geo, mat, x, y, z, cast, recv) {
+    var m = new T.Mesh(geo, mat);
+    m.position.set(x, y, z);
+    m.castShadow = cast !== false;
+    m.receiveShadow = recv !== false;
+    scene.add(m);
+    return m;
+  }
+  function boxMesh(w, h, d, mat, x, y, z, cast, recv) { return mesh(new T.BoxGeometry(w, h, d), mat, x, y, z, cast, recv); }
+
+  /* 벽: x축 방향 */
+  function wallX(lv, x1, x2, z, thick, y0, y1, mat, noCol) {
+    boxMesh(x2 - x1, y1 - y0, thick, mat || MAT.wall, (x1 + x2) / 2, (y0 + y1) / 2, z);
+    if (!noCol) collider(lv, x1, x2, z - thick / 2, z + thick / 2);
+  }
+  function wallZ(lv, z1, z2, x, thick, y0, y1, mat, noCol) {
+    boxMesh(thick, y1 - y0, z2 - z1, mat || MAT.wall, x, (y0 + y1) / 2, (z1 + z2) / 2);
+    if (!noCol) collider(lv, x - thick / 2, x + thick / 2, z1, z2);
+  }
+  /* 창문 띠가 있는 외벽 (x축 방향) */
+  function facadeX(lv, x1, x2, z, thick, y0, sill, mat) {
+    sill = sill === undefined ? 1.05 : sill;
+    var w = x2 - x1;
+    boxMesh(w, sill, thick, mat || MAT.wall, (x1 + x2) / 2, y0 + sill / 2, z);
+    collider(lv, x1, x2, z - thick / 2, z + thick / 2);
+    var gh = CEIL - sill - 0.42;
+    boxMesh(w, gh, 0.1, MAT.glass, (x1 + x2) / 2, y0 + sill + gh / 2, z, false, false);
+    boxMesh(w, 0.42, thick, mat || MAT.wall, (x1 + x2) / 2, y0 + CEIL - 0.21, z);
+    var n = Math.max(1, Math.round(w / 3.4));
+    for (var i = 1; i < n; i++) {
+      boxMesh(0.18, gh, thick * 0.92, MAT.trim, x1 + w * i / n, y0 + sill + gh / 2, z, false, false);
+    }
+    boxMesh(w, 0.12, thick, MAT.trim, (x1 + x2) / 2, y0 + sill, z, false, false);
+    boxMesh(w, 0.12, thick, MAT.trim, (x1 + x2) / 2, y0 + sill + gh, z, false, false);
+  }
+  function facadeZ(lv, z1, z2, x, thick, y0, sill, mat) {
+    sill = sill === undefined ? 1.05 : sill;
+    var d = z2 - z1;
+    boxMesh(thick, sill, d, mat || MAT.wall, x, y0 + sill / 2, (z1 + z2) / 2);
+    collider(lv, x - thick / 2, x + thick / 2, z1, z2);
+    var gh = CEIL - sill - 0.42;
+    boxMesh(0.1, gh, d, MAT.glass, x, y0 + sill + gh / 2, (z1 + z2) / 2, false, false);
+    boxMesh(thick, 0.42, d, mat || MAT.wall, x, y0 + CEIL - 0.21, (z1 + z2) / 2);
+    var n = Math.max(1, Math.round(d / 3.4));
+    for (var i = 1; i < n; i++) {
+      boxMesh(thick * 0.92, gh, 0.18, MAT.trim, x, y0 + sill + gh / 2, z1 + d * i / n, false, false);
+    }
+    boxMesh(thick, 0.12, d, MAT.trim, x, y0 + sill, (z1 + z2) / 2, false, false);
+    boxMesh(thick, 0.12, d, MAT.trim, x, y0 + sill + gh, (z1 + z2) / 2, false, false);
+  }
+  /* 바닥 텍스처 */
+  function woodTex() {
+    var c = cvs(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#dcbd8b'; g.fillRect(0, 0, 256, 256);
+    var R = rnd(5);
+    for (var i = 0; i < 64; i++) {
+      g.fillStyle = 'rgba(150,105,60,' + (0.04 + R() * 0.10).toFixed(2) + ')';
+      g.fillRect(0, i * 4, 256, 1 + R() * 3);
+    }
+    for (var j = 0; j < 8; j++) { g.fillStyle = 'rgba(120,85,50,0.35)'; g.fillRect(0, j * 32, 256, 1.5); }
+    return c;
+  }
+  function tileTex() {
+    var c = cvs(256, 256), g = c.getContext('2d');
+    g.fillStyle = '#eee8dc'; g.fillRect(0, 0, 256, 256);
+    g.strokeStyle = 'rgba(150,145,130,0.42)'; g.lineWidth = 2;
+    for (var i = 0; i <= 4; i++) {
+      g.beginPath(); g.moveTo(i * 64, 0); g.lineTo(i * 64, 256); g.stroke();
+      g.beginPath(); g.moveTo(0, i * 64); g.lineTo(256, i * 64); g.stroke();
+    }
+    var R = rnd(9);
+    for (var k = 0; k < 40; k++) { g.fillStyle = 'rgba(255,255,255,' + (0.2 + R() * 0.3).toFixed(2) + ')'; g.fillRect(R() * 256, R() * 256, 20, 14); }
+    return c;
+  }
+  var classroomFloorTex = texFrom(woodTex(), 8, 4);
+  var corridorFloorTex = texFrom(tileTex(), 10, 3);
+  var gymFloorTex = texFrom(woodTex(), 8, 10);
+
+  /* =====================================================================
+     5. 글자 텍스처 (간판 · 칠판 · 안내판)
+  ===================================================================== */
+  function signTex(w, h, bg, draw) {
+    var c = cvs(w, h), g = c.getContext('2d');
+    if (bg) { g.fillStyle = bg; g.fillRect(0, 0, w, h); }
+    draw(g, w, h);
+    return texFrom(c);
+  }
+  function fitText(g, text, x, y, maxW, size, weight, color) {
+    g.font = (weight || 800) + ' ' + size + 'px ' + KFONT;
+    var wpx = g.measureText(text).width;
+    if (wpx > maxW) { g.font = (weight || 800) + ' ' + Math.floor(size * maxW / wpx) + 'px ' + KFONT; }
+    g.fillStyle = color || '#fff';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(text, x, y);
+  }
+
+  var TEX = {};
+  // 교문 간판
+  TEX.gate = signTex(1152, 288, '#2b7d55', function (g, w, h) {
+    g.strokeStyle = '#ffd166'; g.lineWidth = 10; g.strokeRect(14, 14, w - 28, h - 28);
+    g.fillStyle = '#ffd166'; g.font = '700 52px ' + KFONT; g.textAlign = 'center';
+    g.fillText('홍천', w / 2, 74);
+    fitText(g, '석화초등학교', w / 2, 168, w - 120, 104, 900, '#ffffff');
+    fitText(g, 'SEOKHWA ELEMENTARY SCHOOL', w / 2, 244, w - 200, 34, 700, '#c8f0d8');
+  });
+  // 교문 아치 간판 (7.2:1)
+  TEX.gateArch = signTex(1536, 212, '#2b7d55', function (g, w, h) {
+    g.strokeStyle = '#ffd166'; g.lineWidth = 7; g.strokeRect(10, 10, w - 20, h - 20);
+    fitText(g, '석화초등학교', w / 2, 92, w - 420, 116, 900, '#ffffff');
+    fitText(g, '홍천 · SEOKHWA ELEMENTARY SCHOOL', w / 2, 170, w - 300, 30, 700, '#d6f2e0');
+  });
+  // 건물 명판 (8:1)
+  TEX.plate = signTex(1600, 200, '#2b7d55', function (g, w, h) {
+    g.strokeStyle = '#ffd166'; g.lineWidth = 6; g.strokeRect(8, 8, w - 16, h - 16);
+    fitText(g, '석화초등학교', w / 2, 84, w - 620, 104, 900, '#ffffff');
+    fitText(g, 'SEOKHWA ELEMENTARY SCHOOL', w / 2, 158, w - 700, 28, 700, '#d6f2e0');
+  });
+  // 교훈 안내판
+  TEX.motto = signTex(1280, 520, '#ffffff', function (g, w, h) {
+    g.fillStyle = '#2f9e62'; g.fillRect(0, 0, w, 108);
+    g.fillStyle = '#fff'; g.font = '800 62px ' + KFONT; g.textAlign = 'center';
+    g.fillText('학 교 교 훈', w / 2, 72);
+    g.strokeStyle = '#2f9e62'; g.lineWidth = 8; g.strokeRect(8, 8, w - 16, h - 16);
+    fitText(g, '사랑 · 상상 · 공감으로', w / 2, 218, w - 120, 86, 900, '#1f5b3a');
+    fitText(g, '내일을 열어가는 행복한 학교', w / 2, 330, w - 90, 78, 900, '#1f5b3a');
+    fitText(g, '홍천 석화초등학교', w / 2, 438, w - 300, 46, 700, '#5b7a68');
+  });
+  // 후문
+  TEX.back = signTex(768, 240, '#2b5f7a', function (g, w, h) {
+    g.strokeStyle = '#bfe3f5'; g.lineWidth = 9; g.strokeRect(10, 10, w - 20, h - 20);
+    fitText(g, '후 문', w / 2, 92, w - 90, 90, 900, '#ffffff');
+    fitText(g, '통학로 · 서행', w / 2, 182, w - 160, 42, 700, '#cfeaf7');
+  });
+  // 참빛관 간판
+  TEX.gym = signTex(1024, 288, '#1b5f8a', function (g, w, h) {
+    g.strokeStyle = '#ffd166'; g.lineWidth = 10; g.strokeRect(12, 12, w - 24, h - 24);
+    fitText(g, '참빛관', w / 2, 118, w - 160, 118, 900, '#ffffff');
+    fitText(g, '체 육 관', w / 2, 222, w - 300, 48, 700, '#bfe3f5');
+  });
+  // 체육관 현수막
+  TEX.banner = signTex(1400, 300, '#b8362f', function (g, w, h) {
+    g.fillStyle = '#f7d774'; g.fillRect(0, 0, w, 18); g.fillRect(0, h - 18, w, 18);
+    fitText(g, '함께 뛰는 우리, 빛나는 오늘!', w / 2, 118, w - 120, 88, 900, '#fff4d6');
+    fitText(g, '석화초등학교 참빛관', w / 2, 222, w - 260, 52, 700, '#ffd9a8');
+  });
+  // 칠판
+  TEX.board = signTex(1400, 700, '#22483a', function (g, w, h) {
+    var R = rnd(77);
+    for (var i = 0; i < 40; i++) {
+      g.fillStyle = 'rgba(255,255,255,' + (0.012 + R() * 0.022).toFixed(3) + ')';
+      g.beginPath(); g.ellipse(R() * w, R() * h, 40 + R() * 120, 20 + R() * 60, R() * 3, 0, Math.PI * 2); g.fill();
+    }
+    g.strokeStyle = 'rgba(255,255,255,0.18)'; g.lineWidth = 3; g.strokeRect(18, 18, w - 36, h - 36);
+    g.textAlign = 'center';
+    g.fillStyle = '#f4f8f2'; g.font = '900 108px ' + KFONT;
+    g.fillText('홍천 석화초등학교', w / 2, 150);
+    g.strokeStyle = 'rgba(255,255,255,0.55)'; g.lineWidth = 4;
+    g.beginPath(); g.moveTo(180, 200); g.lineTo(w - 180, 200); g.stroke();
+    g.fillStyle = '#ffe9a8'; g.font = '800 78px ' + KFONT;
+    g.fillText('석화초 3D 메타버스에', w / 2, 310);
+    g.fillText('오신 것을 환영합니다!', w / 2, 412);
+    g.fillStyle = '#bfe8cf'; g.font = '700 56px ' + KFONT;
+    g.fillText('오늘도 신나게, 함께 걸어요', w / 2, 520);
+    g.fillStyle = '#ffd166'; g.font = '700 44px ' + KFONT;
+    g.fillText('정문 · 운동장 · 본관 · 참빛관', w / 2, 606);
+    // 분필 낙서
+    g.strokeStyle = '#ffd9e2'; g.lineWidth = 7;
+    g.beginPath(); g.arc(1180, 300, 42, 0, Math.PI * 2); g.stroke();
+    g.beginPath(); g.moveTo(1160, 330); g.bezierCurveTo(1180, 362, 1200, 362, 1220, 330); g.stroke();
+    g.strokeStyle = '#e8ffd6'; g.lineWidth = 6;
+    g.beginPath(); g.moveTo(210, 470); g.lineTo(255, 500); g.lineTo(210, 530); g.stroke();
+  });
+  // 복도 게시판
+  TEX.notice = signTex(1100, 700, '#fdf6e3', function (g, w, h) {
+    g.fillStyle = '#2f9e62'; g.fillRect(0, 0, w, 96);
+    g.fillStyle = '#fff'; g.font = '800 54px ' + KFONT; g.textAlign = 'center';
+    g.fillText('석화초 알림판', w / 2, 62);
+    var items = [
+      ['11월', '가을 운동회 · 참빛관 체육한마당'],
+      ['알림', '도서실 신간 도서 입고 (2층)'],
+      ['안내', '엘리베이터는 1·2·3층 모두 정상 운행'],
+      ['모집', '축구부 · 농구부 신입 단원 모집 중'],
+      ['당부', '복도에서는 천천히 걸어요']
+    ];
+    for (var i = 0; i < items.length; i++) {
+      var y = 168 + i * 100;
+      g.fillStyle = i % 2 ? '#eef7ea' : '#f6f1e2'; g.fillRect(30, y - 42, w - 60, 82);
+      g.fillStyle = '#2f9e62'; g.font = '800 30px ' + KFONT; g.textAlign = 'left';
+      g.fillText(items[i][0], 54, y);
+      g.fillStyle = '#33463c'; g.font = '600 34px ' + KFONT;
+      g.fillText(items[i][1], 170, y);
+    }
+  });
+  // 층 숫자
+  TEX.floorNum = [0, 1, 2].map(function (i) {
+    return signTex(256, 256, '#2f9e62', function (g, w, h) {
+      g.strokeStyle = '#ffffff'; g.lineWidth = 8; g.strokeRect(12, 12, w - 24, h - 24);
+      fitText(g, (i + 1) + 'F', w / 2, h / 2, w - 60, 118, 900, '#ffffff');
+    });
+  });
+  // 층 안내판
+  TEX.floorDir = signTex(720, 760, '#ffffff', function (g, w, h) {
+    g.fillStyle = '#22302a'; g.fillRect(0, 0, w, 110);
+    g.fillStyle = '#fff'; g.font = '800 60px ' + KFONT; g.textAlign = 'center';
+    g.fillText('층 안내', w / 2, 74);
+    var rows = [['3F', '3학년 교실 · 과학실'], ['2F', '2학년 교실 · 도서실'], ['1F', '로비 · 1학년 교실 · 보건실']];
+    for (var i = 0; i < rows.length; i++) {
+      var y = 180 + i * 180;
+      g.fillStyle = '#2f9e62'; g.fillRect(40, y - 56, 130, 104);
+      g.fillStyle = '#fff'; g.font = '900 54px ' + KFONT; g.textAlign = 'center';
+      g.fillText(rows[i][0], 105, y - 4);
+      g.fillStyle = '#22302a'; g.font = '700 40px ' + KFONT; g.textAlign = 'left';
+      g.fillText(rows[i][1], 196, y - 4);
+    }
+  });
+  // 축구공
+  TEX.ball = signTex(512, 512, '#ffffff', function (g, w, h) {
+    g.fillStyle = '#ffffff'; g.fillRect(0, 0, w, h);
+    for (var i = 0; i < 9; i++) {
+      var a = i / 9 * Math.PI * 2;
+      var x = w / 2 + Math.cos(a) * w * 0.30, y = h / 2 + Math.sin(a) * h * 0.30;
+      g.fillStyle = '#22282c'; g.beginPath();
+      for (var k = 0; k < 5; k++) {
+        var aa = a + k / 5 * Math.PI * 2;
+        var px = x + Math.cos(aa) * 46, py = y + Math.sin(aa) * 46;
+        if (k === 0) g.moveTo(px, py); else g.lineTo(px, py);
+      }
+      g.closePath(); g.fill();
+    }
+    g.fillStyle = '#22282c'; g.beginPath();
+    for (var k2 = 0; k2 < 5; k2++) {
+      var a2 = -Math.PI / 2 + k2 / 5 * Math.PI * 2;
+      var px2 = w / 2 + Math.cos(a2) * 44, py2 = h / 2 + Math.sin(a2) * 44;
+      if (k2 === 0) g.moveTo(px2, py2); else g.lineTo(px2, py2);
+    }
+    g.closePath(); g.fill();
+  });
+  // 농구 코트 바닥
+  TEX.court = signTex(1024, 1024, '#e0bd85', function (g, w, h) {
+    var R = rnd(101);
+    for (var i = 0; i < 90; i++) {
+      g.fillStyle = 'rgba(150,105,60,' + (0.03 + R() * 0.06).toFixed(3) + ')';
+      g.fillRect(0, i * 11, w, 3 + R() * 5);
+    }
+    g.strokeStyle = '#ffffff'; g.lineWidth = 8;
+    g.strokeRect(60, 60, w - 120, h - 120);
+    g.beginPath(); g.moveTo(60, h / 2); g.lineTo(w - 60, h / 2); g.stroke();
+    g.beginPath(); g.arc(w / 2, h / 2, 130, 0, Math.PI * 2); g.stroke();
+    // 골대 구역
+    g.strokeRect(60, h / 2 - 170, 210, 340);
+    g.strokeRect(w - 270, h / 2 - 170, 210, 340);
+    g.beginPath(); g.arc(270, h / 2, 180, -Math.PI / 2, Math.PI / 2); g.stroke();
+    g.beginPath(); g.arc(w - 270, h / 2, 180, Math.PI / 2, Math.PI * 1.5); g.stroke();
+    // 중앙 로고
+    g.globalAlpha = 0.16; g.fillStyle = '#1f6b45';
+    g.beginPath(); g.arc(w / 2, h / 2, 86, 0, Math.PI * 2); g.fill();
+    g.globalAlpha = 1;
+    g.fillStyle = '#1f6b45'; g.font = '900 54px ' + KFONT; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText('석화', w / 2, h / 2 + 60);
+  });
+  // 그물
+  TEX.net = signTex(256, 256, null, function (g, w, h) {
+    g.clearRect(0, 0, w, h);
+    g.strokeStyle = 'rgba(255,255,255,0.85)'; g.lineWidth = 2;
+    for (var i = 0; i <= 16; i++) {
+      g.beginPath(); g.moveTo(i * w / 16, 0); g.lineTo(i * w / 16, h); g.stroke();
+      g.beginPath(); g.moveTo(0, i * h / 16); g.lineTo(w, i * h / 16); g.stroke();
+    }
+  });
+  TEX.net.wrapS = TEX.net.wrapT = T.RepeatWrapping;
+
+  /* =====================================================================
+     6. 정문 · 후문 · 울타리
+  ===================================================================== */
+  function buildGate() {
+    // 정문 기둥
+    [-7.2, 7.2].forEach(function (x) {
+      boxMesh(1.7, 3.6, 1.7, MAT.brick, x, 1.8, 52);
+      boxMesh(2.0, 0.28, 2.0, MAT.concrete, x, 3.74, 52);
+      collider(0, x - 0.85, x + 0.85, 51.15, 52.85);
+    });
+    // 아치 상판
+    boxMesh(16.2, 1.75, 1.05, MAT.wall, 0, 4.5, 52);
+    boxMesh(16.6, 0.18, 1.25, MAT.roofDark, 0, 5.47, 52);
+    // 간판 (양면)
+    var signMat = new T.MeshStandardMaterial({ map: TEX.gateArch, roughness: 0.7 });
+    var s1 = new T.Mesh(new T.PlaneGeometry(13.8, 1.92), signMat);
+    s1.position.set(0, 4.5, 52.56); scene.add(s1);
+    var s2 = new T.Mesh(new T.PlaneGeometry(13.8, 1.92), signMat);
+    s2.position.set(0, 4.5, 51.44); s2.rotation.y = Math.PI; scene.add(s2);
+    // 문주 명판
+    var p = new T.Mesh(new T.PlaneGeometry(1.2, 0.34), new T.MeshStandardMaterial({ color: 0xd9b25a, metalness: 0.5, roughness: 0.4 }));
+    p.position.set(-7.2, 2.5, 52.86); scene.add(p);
+
+    // 교훈 안내판
+    var motto = new T.Mesh(new T.PlaneGeometry(4.6, 1.87), new T.MeshStandardMaterial({ map: TEX.motto, roughness: 0.75 }));
+    motto.position.set(8.9, 1.55, 47);
+    motto.rotation.y = -Math.PI / 2;
+    motto.castShadow = true; scene.add(motto);
+    var back = boxMesh(0.16, 2.0, 4.7, MAT.wood, 9.06, 1.5, 47);
+    back.castShadow = true;
+    boxMesh(0.2, 1.0, 0.2, MAT.darkSteel, 9.0, 0.5, 45.1);
+    boxMesh(0.2, 1.0, 0.2, MAT.darkSteel, 9.0, 0.5, 48.9);
+    collider(0, 8.85, 9.25, 44.6, 49.4);
+
+    // 정문 좌우 담장은 buildFences 에서 만든다
+
+    // 후문
+    [-4.0, 4.0].forEach(function (x) {
+      boxMesh(1.2, 2.9, 1.2, MAT.brick, x, 1.45, -48);
+      boxMesh(1.5, 0.22, 1.5, MAT.concrete, x, 3.0, -48);
+      collider(0, x - 0.6, x + 0.6, -48.6, -47.4);
+    });
+    boxMesh(9.0, 0.85, 0.8, MAT.wall, 0, 3.5, -48);
+    var bs = new T.Mesh(new T.PlaneGeometry(5.4, 1.7), new T.MeshStandardMaterial({ map: TEX.back, roughness: 0.75 }));
+    bs.position.set(0, 3.5, -47.55); scene.add(bs);
+    var bs2 = bs.clone(); bs2.position.set(0, 3.5, -48.45); bs2.rotation.y = Math.PI; scene.add(bs2);
+
+    // 후문 안내 입간판
+    var bsSign = new T.Mesh(new T.PlaneGeometry(2.4, 0.75), new T.MeshStandardMaterial({ map: TEX.back, roughness: 0.8 }));
+    bsSign.position.set(6.4, 1.5, -45.6); bsSign.rotation.y = -Math.PI / 3.2; scene.add(bsSign);
+    boxMesh(0.16, 1.5, 0.16, MAT.steel, 6.2, 0.75, -45.8);
+    boxMesh(0.16, 1.5, 0.16, MAT.steel, 6.7, 0.75, -45.4);
+  }
+
+  function addFence(lv, x1, x2, z, kind) {
+    // kind 0: 남쪽(z고정) 1: 그대로, 2: 동쪽(x고정)
+    var len = Math.abs(x2 - x1), cx = (x1 + x2) / 2;
+    if (kind === 2) {
+      boxMesh(0.6, 1.15, len, MAT.hedge, z, 0.58, cx);
+      collider(lv, z - 0.3, z + 0.3, Math.min(x1, x2), Math.max(x1, x2));
+      return;
+    }
+    boxMesh(len, 1.15, 0.6, MAT.hedge, cx, 0.58, z);
+    collider(lv, Math.min(x1, x2), Math.max(x1, x2), z - 0.3, z + 0.3);
+  }
+  function buildFences() {
+    addFence(0, -60, -4.6, -48, 0);
+    addFence(0, 4.6, 60, -48, 0);
+    addFence(0, -60, -8.05, 52, 0);
+    addFence(0, 8.05, 60, 52, 0);
+    addFence(0, -48, 52, -60, 2);
+    addFence(0, -48, 52, 63.5, 2);
+    // 담장 기둥
+    for (var x = -56; x <= 56; x += 8) {
+      if (Math.abs(x) > 10) boxMesh(0.34, 1.5, 0.34, MAT.concrete, x, 0.75, 52);
+      if (Math.abs(x) > 6) boxMesh(0.34, 1.5, 0.34, MAT.concrete, x, 0.75, -48);
+    }
+    for (var z = -44; z <= 48; z += 8) {
+      boxMesh(0.34, 1.5, 0.34, MAT.concrete, 63.5, 0.75, z);
+      boxMesh(0.34, 1.5, 0.34, MAT.concrete, -60, 0.75, z);
+    }
+  }
+
+  /* =====================================================================
+     7. 나무 · 운동장 시설
+  ===================================================================== */
+  function juniper(x, z, s) {
+    s = s || 1;
+    var g = new T.Group();
+    var tr = new T.Mesh(new T.CylinderGeometry(0.18 * s, 0.26 * s, 1.2 * s, 7), MAT.trunk);
+    tr.position.y = 0.6 * s; tr.castShadow = true; g.add(tr);
+    for (var i = 0; i < 3; i++) {
+      var cone = new T.Mesh(new T.ConeGeometry((1.25 - i * 0.28) * s, (2.3 - i * 0.35) * s, 8), i === 2 ? MAT.leaf : MAT.leafDark);
+      cone.position.y = (1.5 + i * 1.25) * s;
+      cone.castShadow = true; g.add(cone);
+    }
+    g.position.set(x, 0, z);
+    scene.add(g);
+    collider(0, x - 0.35, x + 0.35, z - 0.35, z + 0.35);
+    return g;
+  }
+  function roundTree(x, z, s) {
+    s = s || 1;
+    var g = new T.Group();
+    var tr = new T.Mesh(new T.CylinderGeometry(0.22 * s, 0.34 * s, 2.2 * s, 7), MAT.trunk);
+    tr.position.y = 1.1 * s; tr.castShadow = true; g.add(tr);
+    var c1 = new T.Mesh(new T.IcosahedronGeometry(1.7 * s, 0), MAT.leaf);
+    c1.position.y = 2.9 * s; c1.castShadow = true; g.add(c1);
+    var c2 = new T.Mesh(new T.IcosahedronGeometry(1.15 * s, 0), MAT.leafDark);
+    c2.position.set(0.9 * s, 2.3 * s, 0.5 * s); c2.castShadow = true; g.add(c2);
+    var c3 = new T.Mesh(new T.IcosahedronGeometry(1.0 * s, 0), MAT.leaf);
+    c3.position.set(-0.85 * s, 2.5 * s, -0.6 * s); c3.castShadow = true; g.add(c3);
+    g.position.set(x, 0, z);
+    scene.add(g);
+    collider(0, x - 0.4, x + 0.4, z - 0.4, z + 0.4);
+    return g;
+  }
+  function buildTrees() {
+    // 교목 향나무 (본관 앞)
+    [-31, -24, 24, 31].forEach(function (x) { juniper(x, -8.6, 1.15); });
+    juniper(-36.5, 2, 1.0); juniper(36.5, 2, 1.0); juniper(-38, 44, 1.1); juniper(38, 44, 1.1);
+    // 운동장 주변 큰 나무
+    [[-40, -4], [40, -4], [-42, 34], [42, 34], [-48, 20], [48, 20], [-48, 2], [48, 2],
+      [-30, 47], [30, 47], [-14, 47], [14, 47], [-52, -20], [56, -40], [-56, -40], [40, -44]]
+      .forEach(function (p, i) { roundTree(p[0], p[1], i % 3 === 0 ? 1.25 : 1.0); });
+    // 후문 쪽
+    roundTree(-10, -40, 1.1); roundTree(10, -40, 1.1); roundTree(-16, -44, 0.95);
+  }
+
+  function buildFieldStuff() {
+    // 축구 골대 2개
+    function goal(z, dir) {
+      var g = new T.Group();
+      var post = new T.CylinderGeometry(0.1, 0.1, 2.44, 8);
+      var p1 = new T.Mesh(post, MAT.white); p1.position.set(-3.66, 1.22, 0); g.add(p1);
+      var p2 = new T.Mesh(post, MAT.white); p2.position.set(3.66, 1.22, 0); g.add(p2);
+      var bar = new T.Mesh(new T.CylinderGeometry(0.1, 0.1, 7.32, 8), MAT.white);
+      bar.rotation.z = Math.PI / 2; bar.position.set(0, 2.44, 0); g.add(bar);
+      var netMat = new T.MeshBasicMaterial({ map: TEX.net, transparent: true, opacity: 0.55, side: T.DoubleSide });
+      TEX.net.repeat.set(4, 2);
+      var back = new T.Mesh(new T.PlaneGeometry(7.32, 2.44), netMat);
+      back.position.set(0, 1.22, 1.9 * dir); g.add(back);
+      var top = new T.Mesh(new T.PlaneGeometry(7.32, 1.9), netMat);
+      top.rotation.x = Math.PI / 2; top.position.set(0, 2.44, 0.95 * dir); g.add(top);
+      g.traverse(function (o) { if (o.isMesh) o.castShadow = true; });
+      g.position.set(0, 0, z);
+      scene.add(g);
+      collider(0, -3.8, -3.5, z - 0.15, z + 0.15);
+      collider(0, 3.5, 3.8, z - 0.15, z + 0.15);
+    }
+    goal(PITCH.z1 + 0.8, -1);
+    goal(PITCH.z2 - 0.8, 1);
+
+    // 축구공
+    var ball = new T.Mesh(new T.SphereGeometry(0.23, 18, 14), new T.MeshStandardMaterial({ map: TEX.ball, roughness: 0.55 }));
+    ball.position.set(2.4, 0.23, 24); ball.castShadow = true; scene.add(ball);
+    var ball2 = ball.clone(); ball2.position.set(-3.2, 0.23, 12); scene.add(ball2);
+    var bball = new T.Mesh(new T.SphereGeometry(0.24, 16, 12), std(0xe08a3a, 0.7));
+    bball.position.set(-2.0, 0.24, 31); bball.castShadow = true; scene.add(bball);
+
+    // 조회대
+    boxMesh(6.4, 1.0, 5.6, MAT.concrete, -41, 0.5, 5);
+    boxMesh(6.8, 0.16, 6.0, MAT.wall, -41, 1.06, 5);
+    for (var i = 0; i < 3; i++) boxMesh(1.2, 0.22 + i * 0.26, 0.5, MAT.concrete, -41, (0.22 + i * 0.26) / 2, 8.0 + i * 0.5);
+    collider(0, -44.4, -37.6, 2.1, 8.0);
+    // 단상 연단
+    boxMesh(1.0, 1.2, 0.9, MAT.wood, -41, 1.66, 4.2);
+    boxMesh(0.16, 0.7, 0.16, MAT.darkSteel, -41, 2.45, 4.2);
+    var mic = new T.Mesh(new T.SphereGeometry(0.09, 8, 6), MAT.darkSteel);
+    mic.position.set(-41, 2.85, 4.2); scene.add(mic);
+
+    // 국기 게양대
+    var pole = new T.Mesh(new T.CylinderGeometry(0.09, 0.11, 9, 8), MAT.steel);
+    pole.position.set(-46, 4.5, 10); pole.castShadow = true; scene.add(pole);
+    collider(0, -46.4, -45.6, 9.6, 10.4);
+    var flag = new T.Mesh(new T.PlaneGeometry(2.4, 1.5), std(0xf2f4f7, 0.9));
+    flag.position.set(-44.8, 8.0, 10); scene.add(flag);
+
+    // 스탠드 (계단식 관람석)
+    for (var t = 0; t < 3; t++) {
+      var h = 0.45 + t * 0.45;
+      boxMesh(4.0, h, 5.4, MAT.concrete, -52 + t * 0, h / 2, 13 + t * 5.4);
+      boxMesh(4.0, 0.12, 0.5, MAT.green, -52, h + 0.06, 11.4 + t * 5.4);
+    }
+    collider(0, -54.2, -49.8, 10.4, 30.4);
+
+    // 벤치
+    function bench(x, z, rot) {
+      var g = new T.Group();
+      var seat = new T.Mesh(new T.BoxGeometry(2.6, 0.12, 0.5), MAT.woodLight); seat.position.y = 0.55; g.add(seat);
+      var back = new T.Mesh(new T.BoxGeometry(2.6, 0.45, 0.1), MAT.woodLight); back.position.set(0, 0.8, -0.2); g.add(back);
+      [-1.05, 1.05].forEach(function (dx) {
+        var lg = new T.Mesh(new T.BoxGeometry(0.1, 0.55, 0.45), MAT.darkSteel); lg.position.set(dx, 0.28, 0); g.add(lg);
+      });
+      g.traverse(function (o) { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+      g.position.set(x, 0, z); g.rotation.y = rot || 0; scene.add(g);
+    }
+    bench(-14, -6.5, 0); bench(14, -6.5, 0); bench(-6, -6.5, 0); bench(6, -6.5, 0);
+    bench(-46, 40, Math.PI / 2); bench(46, 40, -Math.PI / 2);
+
+    // 농구대 (야외) - 체육관 옆
+    // 화단 경계 (장미)
+    boxMesh(18, 0.35, 1.8, MAT.soil, -17, 0.17, -11.4, false, true);
+    boxMesh(18, 0.35, 1.8, MAT.soil, 17, 0.17, -11.4, false, true);
+    var R = rnd(66);
+    for (var f = 0; f < 90; f++) {
+      var fx = (f < 45 ? -26 : 8) + R() * 18, fz = -12.2 + R() * 1.7;
+      var fl = new T.Mesh(new T.SphereGeometry(0.16, 6, 5), std(R() > 0.4 ? 0xe2566d : 0xf2b6c4, 0.9));
+      fl.position.set(fx, 0.42, fz); scene.add(fl);
+    }
+  }
+
+  /* =====================================================================
+     8. 본관 (3층 · 복도 · 교실 · 엘리베이터 · 계단)
+  ===================================================================== */
+  var deskInstances = [], chairInstances = [];
+
+  function buildMain() {
+    for (var f = 0; f < 3; f++) {
+      var y0 = f * FLOOR_H;
+      var yT = y0 + CEIL;
+
+      /* ---- 외벽 ---- */
+      if (f === 0) {
+        facadeX(0, B.x1, -3.4, -10.35, 0.7, y0);
+        facadeX(0, 3.4, B.x2, -10.35, 0.7, y0);
+      } else {
+        facadeX(f, B.x1, B.x2, -10.35, 0.7, y0);
+      }
+      facadeX(f, B.x1, B.x2, -29.65, 0.7, y0);
+      facadeZ(f, B.z1, B.z2, -36.35, 0.7, y0);
+      if (f === 0) {
+        facadeZ(0, B.z1, -24, 36.35, 0.7, y0);
+        facadeZ(0, -22, B.z2, 36.35, 0.7, y0);
+      } else {
+        facadeZ(f, B.z1, B.z2, 36.35, 0.7, y0);
+      }
+
+      /* ---- 층 색 띠 ---- */
+      boxMesh(72.4, 0.42, 0.12, MAT.band2, 0, y0 + 0.2, -9.98);
+      boxMesh(72.4, 0.42, 0.12, MAT.band2, 0, y0 + 0.2, -30.02);
+      boxMesh(0.12, 0.42, 20.3, MAT.band2, -36.72, y0 + 0.2, -20);
+      boxMesh(0.12, 0.42, 20.3, MAT.band2, 36.72, y0 + 0.2, -20);
+
+      /* ---- 바닥 / 천장 ---- */
+      var fl = new T.Mesh(new T.PlaneGeometry(68.6, 19.2), new T.MeshStandardMaterial({ map: corridorFloorTex, roughness: 0.85 }));
+      fl.rotation.x = -Math.PI / 2; fl.position.set(0, y0 + 0.02, -20); fl.receiveShadow = true; scene.add(fl);
+
+      [-21.5, 21.5].forEach(function (cx) {
+        var cf = new T.Mesh(new T.PlaneGeometry(25, 10), new T.MeshStandardMaterial({ map: classroomFloorTex, roughness: 0.88 }));
+        cf.rotation.x = -Math.PI / 2; cf.position.set(cx, y0 + 0.04, -16); cf.receiveShadow = true; scene.add(cf);
+      });
+
+      boxMesh(68.8, 0.6, 18.8, MAT.ceil, 0, y0 + CEIL + 0.3, -20);
+
+      /* ---- 내부 벽 ---- */
+      // 로비 ↔ 교실 (x = ±9)
+      wallZ(f, -21, -16, -9, 0.3, y0, yT, MAT.wall2);
+      wallZ(f, -14, -11, -9, 0.3, y0, yT, MAT.wall2);
+      wallZ(f, -21, -16, 9, 0.3, y0, yT, MAT.wall2);
+      wallZ(f, -14, -11, 9, 0.3, y0, yT, MAT.wall2);
+
+      // 복도 남벽 (z = -21) - 교실 문 2개
+      wallX(f, -34, -30, -21, 0.3, y0, yT, MAT.wall2);
+      wallX(f, -27, -9, -21, 0.3, y0, yT, MAT.wall2);
+      wallX(f, 9, 27, -21, 0.3, y0, yT, MAT.wall2);
+      wallX(f, 30, 34, -21, 0.3, y0, yT, MAT.wall2);
+
+      // 복도 북벽 (z = -25)
+      wallX(f, -34, -29, -25, 0.3, y0, yT, MAT.wall2);
+      wallX(f, -27, -19, -25, 0.3, y0, yT, MAT.wall2);
+      wallX(f, -17, -12, -25, 0.3, y0, yT, MAT.wall2);
+      wallX(f, 10, 10.4, -25, 0.3, y0, yT, MAT.wall2);
+      wallX(f, 12.4, 20, -25, 0.3, y0, yT, MAT.wall2);
+      wallX(f, 20, 25, -25, 0.3, y0, yT, MAT.wall2);
+      wallX(f, 27, 34, -25, 0.3, y0, yT, MAT.wall2);
+
+      // 북쪽 방 칸막이
+      wallZ(f, -29, -25, -24, 0.3, y0, yT, MAT.wall2);
+      wallZ(f, -29, -25, -12, 0.3, y0, yT, MAT.wall2);
+      wallZ(f, -29, -25, 10, 0.3, y0, yT, MAT.wall2);
+      wallZ(f, -29, -25, 20, 0.3, y0, yT, MAT.wall2);
+
+      /* ---- 문 (문틀 + 유리문) ---- */
+      doorX(f, -30, -27, -21, y0, true);
+      doorX(f, 27, 30, -21, y0, false);
+      doorZ(f, -16, -14, -9, y0, false);
+      doorZ(f, -16, -14, 9, y0, true);
+      doorX(f, -29, -27, -25, y0, true);
+      doorX(f, -19, -17, -25, y0, true);
+      doorX(f, 25, 27, -25, y0, false);
+      doorX(f, 10.4, 12.4, -25, y0, false);
+
+      /* ---- 교실 ---- */
+      buildClassroom(f, -21.5, y0);
+      buildClassroom(f, 21.5, y0);
+
+      /* ---- 층 표시 (복도) ---- */
+      var flr = new T.Mesh(new T.PlaneGeometry(0.9, 0.9), new T.MeshStandardMaterial({ map: TEX.floorNum[f], roughness: 0.8 }));
+      flr.position.set(-33.6, y0 + 2.6, -23.4); flr.rotation.y = Math.PI / 2; scene.add(flr);
+      if (f > 0) {
+        var nb2 = new T.Mesh(new T.PlaneGeometry(3.0, 1.95), new T.MeshStandardMaterial({ map: TEX.notice, roughness: 0.85 }));
+        nb2.position.set(-15, y0 + 1.85, -24.76); scene.add(nb2);
+        boxMesh(3.3, 2.2, 0.12, MAT.wood, -15, y0 + 1.85, -24.84);
+      }
+
+      /* ---- 복도 게시판 ---- */
+      if (f === 0) {
+        var nb = new T.Mesh(new T.PlaneGeometry(3.4, 2.2), new T.MeshStandardMaterial({ map: TEX.notice, roughness: 0.85 }));
+        nb.position.set(-15, y0 + 1.9, -24.78); scene.add(nb);
+        boxMesh(3.7, 2.45, 0.12, MAT.wood, -15, y0 + 1.9, -24.86);
+        var nbF = new T.Mesh(new T.PlaneGeometry(3.4, 2.2), new T.MeshStandardMaterial({ map: TEX.notice, roughness: 0.85 }));
+        nbF.position.set(-15, y0 + 1.9, -24.74); scene.add(nbF);
+      }
+      // 층 안내판 (로비)
+      if (f === 0) {
+        var fd = new T.Mesh(new T.PlaneGeometry(1.5, 1.58), new T.MeshStandardMaterial({ map: TEX.floorDir, roughness: 0.85 }));
+        fd.position.set(-7.2, y0 + 1.55, -12.6); fd.rotation.y = Math.PI * 0.12; scene.add(fd);
+        boxMesh(1.6, 1.7, 0.1, MAT.wood, -7.2, y0 + 1.55, -12.68);
+      }
+
+      /* ---- 조명 ---- */
+      var lightMat = new T.MeshBasicMaterial({ color: 0xfff6dd });
+      for (var lx = -30; lx <= 30; lx += 12) {
+        var pl = new T.Mesh(new T.PlaneGeometry(2.6, 0.5), lightMat);
+        pl.rotation.x = Math.PI / 2; pl.position.set(lx, yT - 0.03, -23); scene.add(pl);
+      }
+      [-21.5, 21.5].forEach(function (cx) {
+        for (var lz = -18; lz <= -13; lz += 3.4) {
+          var pl2 = new T.Mesh(new T.PlaneGeometry(2.4, 0.5), lightMat);
+          pl2.rotation.x = Math.PI / 2; pl2.position.set(cx, yT - 0.03, lz); scene.add(pl2);
+        }
+      });
+
+      /* ---- 계단 ---- */
+      buildStairs(f, y0);
+    }
+
+    /* ---- 1층 출입구 ---- */
+    boxMesh(0.22, 3.0, 0.9, MAT.trim, -3.4, 1.5, -10.35);
+    boxMesh(0.22, 3.0, 0.9, MAT.trim, 3.4, 1.5, -10.35);
+    boxMesh(6.8, 0.45, 0.9, MAT.wall, 0, CEIL - 0.22, -10.35);
+    // 유리 자동문 (반쯤 열린 모양)
+    boxMesh(1.55, 2.85, 0.1, MAT.glassDoor, -2.55, 1.45, -10.3, false, false);
+    boxMesh(1.55, 2.85, 0.1, MAT.glassDoor, 2.55, 1.45, -10.3, false, false);
+    boxMesh(0.12, 2.9, 0.16, MAT.trim, -2.55, 1.45, -10.3);
+    boxMesh(0.12, 2.9, 0.16, MAT.trim, 2.55, 1.45, -10.3);
+    boxMesh(0.12, 2.9, 0.16, MAT.trim, -3.3, 1.45, -10.3);
+    boxMesh(0.12, 2.9, 0.16, MAT.trim, 3.3, 1.45, -10.3);
+    boxMesh(1.5, 0.14, 0.2, MAT.trim, 0, 2.95, -10.3);
+
+    // 캐노피
+    boxMesh(14, 0.28, 4.8, MAT.wall, 0, 3.65, -7.9);
+    boxMesh(14.4, 0.18, 5.1, MAT.roofDark, 0, 3.86, -7.9);
+    boxMesh(0.55, 3.5, 0.55, MAT.trim, -6.2, 1.75, -6.1);
+    boxMesh(0.55, 3.5, 0.55, MAT.trim, 6.2, 1.75, -6.1);
+    collider(0, -6.45, -5.95, -6.35, -5.85);
+    collider(0, 5.95, 6.45, -6.35, -5.85);
+    // 현판 (캐노피 앞면)
+    var entSign = new T.Mesh(new T.PlaneGeometry(9.6, 1.2), new T.MeshStandardMaterial({ map: TEX.plate, roughness: 0.7 }));
+    entSign.position.set(0, 3.42, -5.42); scene.add(entSign);
+
+    /* ---- 옥상 ---- */
+    boxMesh(72.8, 0.55, 20.8, MAT.roof, 0, 12.3, -20);
+    boxMesh(72.8, 0.9, 0.5, MAT.trim, 0, 12.95, -30.1);
+    boxMesh(72.8, 0.9, 0.5, MAT.trim, 0, 12.95, -9.9);
+    boxMesh(0.5, 0.9, 20.8, MAT.trim, -36.2, 12.95, -20);
+    boxMesh(0.5, 0.9, 20.8, MAT.trim, 36.2, 12.95, -20);
+    // 옥상 계단탑 + 물탱크
+    boxMesh(6, 2.6, 5, MAT.wall2, -22, 13.9, -24);
+    boxMesh(6.4, 0.3, 5.4, MAT.roofDark, -22, 15.3, -24);
+    var tank = new T.Mesh(new T.CylinderGeometry(1.8, 1.8, 3.2, 14), MAT.steel);
+    tank.position.set(16, 14.2, -22); tank.castShadow = true; scene.add(tank);
+    // 옥상 학교 이름 간판
+    boxMesh(13, 1.9, 0.4, MAT.wall, 0, 14.5, -29.4);
+    var roofSign = new T.Mesh(new T.PlaneGeometry(12.4, 1.55), new T.MeshStandardMaterial({ map: TEX.plate, roughness: 0.7 }));
+    roofSign.position.set(0, 14.5, -29.16); scene.add(roofSign);
+    // 건물 앞 계단
+    boxMesh(9, 0.12, 1.0, MAT.concrete, 0, 0.06, -9.4);
+
+    /* ---- 로비 소품 ---- */
+    function plant(x, z) {
+      var pot = new T.Mesh(new T.CylinderGeometry(0.32, 0.26, 0.5, 10), std(0xb9793f, 0.95));
+      pot.position.set(x, 0.25, z); pot.castShadow = true; scene.add(pot);
+      var bush = new T.Mesh(new T.IcosahedronGeometry(0.42, 0), MAT.leaf);
+      bush.position.set(x, 0.85, z); bush.castShadow = true; scene.add(bush);
+      var bush2 = new T.Mesh(new T.IcosahedronGeometry(0.28, 0), MAT.leafDark);
+      bush2.position.set(x + 0.2, 1.12, z - 0.1); scene.add(bush2);
+      collider(0, x - 0.35, x + 0.35, z - 0.35, z + 0.35);
+    }
+    plant(-4.2, -11.6); plant(4.2, -11.6); plant(-8.2, -20.2); plant(8.2, -20.2);
+    // 로비 벤치
+    boxMesh(2.4, 0.12, 0.5, MAT.woodLight, -6.6, 0.46, -13.2);
+    boxMesh(2.4, 0.45, 0.1, MAT.woodLight, -6.6, 0.72, -13.45);
+    boxMesh(0.12, 0.46, 0.45, MAT.darkSteel, -7.6, 0.23, -13.2);
+    boxMesh(0.12, 0.46, 0.45, MAT.darkSteel, -5.6, 0.23, -13.2);
+    collider(0, -7.85, -5.35, -13.55, -12.95);
+    // 우산 꽂이
+    boxMesh(0.5, 0.75, 0.5, std(0x7f8c99, 0.9), 6.6, 0.38, -11.5);
+    collider(0, 6.3, 6.9, -11.8, -11.2);
+  }
+
+  /* 문 달기 */
+  function doorX(lv, x1, x2, z, y0, swing) {
+    var w = x2 - x1;
+    boxMesh(0.14, 2.2, 0.55, MAT.trim, x1 - 0.02, y0 + 1.1, z);
+    boxMesh(0.14, 2.2, 0.55, MAT.trim, x2 + 0.02, y0 + 1.1, z);
+    boxMesh(w + 0.3, 0.28, 0.5, MAT.trim, (x1 + x2) / 2, y0 + 2.34, z);
+    boxMesh(w, CEIL - 2.48, 0.3, MAT.wall2, (x1 + x2) / 2, y0 + 2.48 + (CEIL - 2.48) / 2, z, true, true);
+    // 열린 문짝
+    var d = boxMesh(w * 0.92, 2.1, 0.08, MAT.glassDoor, x1 + w * 0.5 + (swing ? -w * 0.42 : w * 0.42), y0 + 1.05, z + (swing ? -0.5 : 0.5), false, false);
+    d.rotation.y = swing ? 0.9 : -0.9;
+  }
+  function doorZ(lv, z1, z2, x, y0, swing) {
+    var d = z2 - z1;
+    boxMesh(0.55, 2.2, 0.14, MAT.trim, x, y0 + 1.1, z1 - 0.02);
+    boxMesh(0.55, 2.2, 0.14, MAT.trim, x, y0 + 1.1, z2 + 0.02);
+    boxMesh(0.5, 0.28, d + 0.3, MAT.trim, x, y0 + 2.34, (z1 + z2) / 2);
+    boxMesh(0.3, CEIL - 2.48, d, MAT.wall2, x, y0 + 2.48 + (CEIL - 2.48) / 2, (z1 + z2) / 2, true, true);
+    var p = boxMesh(0.08, 2.1, d * 0.92, MAT.glassDoor, x + (swing ? 0.5 : -0.5), y0 + 1.05, z1 + d * 0.5, false, false);
+    p.rotation.y = swing ? -0.9 : 0.9;
+  }
+
+  function buildClassroom(f, cx, y0) {
+    var left = cx < 0;
+    // 칠판 (북쪽 벽 = 복도 쪽)
+    var bb = new T.Mesh(new T.PlaneGeometry(8.4, 2.0), new T.MeshStandardMaterial({ map: TEX.board, roughness: 0.9 }));
+    bb.position.set(cx, y0 + 1.65, -20.82); scene.add(bb);
+    boxMesh(8.8, 2.35, 0.14, MAT.wood, cx, y0 + 1.65, -20.9);
+    boxMesh(8.4, 0.1, 0.3, MAT.wood, cx, y0 + 0.6, -20.78);   // 분필 받침
+
+    // 교탁
+    boxMesh(2.4, 0.1, 0.9, MAT.wood, cx, y0 + 0.78, -19.4);
+    boxMesh(0.14, 0.75, 0.8, MAT.wood, cx - 1.1, y0 + 0.38, -19.4);
+    boxMesh(0.14, 0.75, 0.8, MAT.wood, cx + 1.1, y0 + 0.38, -19.4);
+    boxMesh(2.0, 0.5, 0.06, MAT.wood, cx, y0 + 0.5, -19.78);
+
+    // 책걸상 (4열 × 3줄)
+    var cols = [-8.6, -4.0, 4.0, 8.6];
+    var rows = [-2.6, 0, 2.6];
+    for (var i = 0; i < cols.length; i++) {
+      for (var j = 0; j < rows.length; j++) {
+        deskInstances.push({ x: cx + cols[i], y: y0, z: -16 + rows[j] });
+        chairInstances.push({ x: cx + cols[i], y: y0, z: -16 + rows[j] + 0.62 });
+      }
+    }
+
+    // 사물함 (창가 쪽 벽)
+    var lx = left ? -33.4 : 33.4;
+    boxMesh(0.7, 2.1, 4.2, MAT.desk2, lx, y0 + 1.05, -14.5);
+    for (var k = 0; k < 4; k++) boxMesh(0.74, 0.06, 1.0, MAT.trim, lx, y0 + 0.2 + k * 0.5, -14.5, false, false);
+
+    // 게시물
+    var posterColors = [0xffd166, 0x8fd0f0, 0xf2b6c4];
+    for (var p2 = 0; p2 < 2; p2++) {
+      var px = cx + (p2 === 0 ? -7.2 : 7.2);
+      var pm = boxMesh(0.95, 1.25, 0.05, std(posterColors[p2], 0.9), px, y0 + 2.05, -20.72, false, false);
+      pm.rotation.z = (p2 === 0 ? 0.04 : -0.04);
+    }
+    // 교실 뒷벽 게시물
+    boxMesh(1.0, 1.0, 0.05, std(posterColors[2], 0.9), cx - 3.4, y0 + 0.62, -10.66, false, false);
+    // 시계
+    var clock = new T.Mesh(new T.CircleGeometry(0.32, 20), std(0xffffff, 0.5));
+    clock.position.set(cx + 7.5, y0 + 2.7, -20.8); scene.add(clock);
+  }
+
+  function buildStairs(f, y0) {
+    var steps = 12, rise = CEIL / steps, run = (19.4 - 13) / steps;
+    for (var i = 0; i < steps; i++) {
+      boxMesh(run, rise * (i + 1), 3.2, MAT.concrete, 13 + run * (i + 0.5), y0 + rise * (i + 1) / 2, -27);
+    }
+    // 난간
+    var rail = boxMesh(6.6, 0.1, 0.1, MAT.darkSteel, 16.2, y0 + 1.9, -28.5, false, false);
+    rail.rotation.z = -Math.atan2(CEIL, 6.4);
+    var rail2 = boxMesh(6.6, 0.1, 0.1, MAT.darkSteel, 16.2, y0 + 1.9, -25.5, false, false);
+    rail2.rotation.z = -Math.atan2(CEIL, 6.4);
+    for (var j = 0; j < 5; j++) {
+      boxMesh(0.08, 1.0, 0.08, MAT.darkSteel, 13.5 + j * 1.5, y0 + 0.5 + j * CEIL / 5 * 0.98, -28.5, false, false);
+    }
+    collider(f, 13, 19.5, -28.7, -25.3);
+    // 계단 안내 표시
+    var sgn = new T.Mesh(new T.PlaneGeometry(0.7, 0.9), new T.MeshStandardMaterial({ map: TEX.floorDir, roughness: 0.9 }));
+    sgn.position.set(10.6, y0 + 1.8, -25.4); scene.add(sgn);
+  }
+
+  /* 책걸상 인스턴스 */
+  function buildDeskInstances() {
+    var deskGeom = mergeGeoms([
+      bg(1.15, 0.06, 0.6, 0, 0.72, 0),
+      bg(0.07, 0.7, 0.55, -0.52, 0.35, 0),
+      bg(0.07, 0.7, 0.55, 0.52, 0.35, 0),
+      bg(1.0, 0.28, 0.05, 0, 0.5, -0.24)
+    ]);
+    var chairGeom = mergeGeoms([
+      bg(0.5, 0.06, 0.45, 0, 0.44, 0),
+      bg(0.5, 0.42, 0.06, 0, 0.66, 0.21),
+      bg(0.05, 0.44, 0.05, -0.2, 0.22, -0.18),
+      bg(0.05, 0.44, 0.05, 0.2, 0.22, -0.18),
+      bg(0.05, 0.44, 0.05, -0.2, 0.22, 0.18),
+      bg(0.05, 0.44, 0.05, 0.2, 0.22, 0.18)
+    ]);
+    var dm = new T.InstancedMesh(deskGeom, MAT.desk, deskInstances.length);
+    var cm = new T.InstancedMesh(chairGeom, MAT.desk2, chairInstances.length);
+    var m4 = new T.Matrix4();
+    for (var i = 0; i < deskInstances.length; i++) {
+      var d = deskInstances[i];
+      m4.makeTranslation(d.x, d.y, d.z); dm.setMatrixAt(i, m4);
+      var ch = chairInstances[i];
+      m4.makeTranslation(ch.x, ch.y, ch.z); cm.setMatrixAt(i, m4);
+    }
+    dm.castShadow = true; dm.receiveShadow = true;
+    cm.castShadow = true; cm.receiveShadow = true;
+    scene.add(dm); scene.add(cm);
+  }
+
+  /* =====================================================================
+     9. 엘리베이터 (작동!)
+  ===================================================================== */
+  var ELEV = {
+    y: 0, floor: 0, target: 0, moving: false,
+    doorsOpen: true, doorT: 1, doorSets: [], indicators: [], cab: null,
+    waitFor: 0, pendingTarget: null
+  };
+
+  function makeIndicator() {
+    var c = cvs(256, 96), g = c.getContext('2d');
+    g.fillStyle = '#0d1a14'; g.fillRect(0, 0, 256, 96);
+    var t = new T.CanvasTexture(c);
+    t.colorSpace = T.SRGBColorSpace;
+    return { c: c, g: g, t: t, last: -99 };
+  }
+  function drawIndicator(ind, floor, moving, open) {
+    var key = floor * 10 + (moving ? 1 : 0) + (open ? 2 : 0);
+    if (ind.last === key) return;
+    ind.last = key;
+    var g = ind.g;
+    g.fillStyle = '#0b1712'; g.fillRect(0, 0, 256, 96);
+    g.strokeStyle = '#2f6b4d'; g.lineWidth = 4; g.strokeRect(4, 4, 248, 88);
+    g.fillStyle = moving ? '#ffd166' : '#8dffb9';
+    g.font = '800 60px ' + KFONT; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText((floor + 1) + 'F', 92, 50);
+    g.fillStyle = moving ? '#ffb703' : (open ? '#8dffb9' : '#6b8c7c');
+    g.font = '700 30px ' + KFONT;
+    g.fillText(moving ? '▲▼' : (open ? '열림' : '닫힘'), 190, 52);
+    ind.t.needsUpdate = true;
+  }
+
+  function buildElevator() {
+    var X = 0, Z = -18.65;   // 승강기 중심
+    // 샤프트 (모든 층)
+    for (var f = 0; f < 3; f++) {
+      var y0 = f * FLOOR_H;
+      wallX(f, -2.7, 2.7, -21, 0.32, y0, y0 + CEIL, MAT.wall2);
+      wallZ(f, -21, -16.4, -2.6, 0.32, y0, y0 + CEIL, MAT.wall2);
+      wallZ(f, -21, -16.4, 2.6, 0.32, y0, y0 + CEIL, MAT.wall2);
+      // 문틀
+      boxMesh(0.5, CEIL, 0.4, MAT.trim, -1.35, y0 + CEIL / 2, -16.45);
+      boxMesh(0.5, CEIL, 0.4, MAT.trim, 1.35, y0 + CEIL / 2, -16.45);
+      boxMesh(3.2, CEIL - 2.42, 0.4, MAT.wall2, 0, y0 + 2.42 + (CEIL - 2.42) / 2, -16.45);
+      boxMesh(0.85, CEIL, 0.4, MAT.wall2, -2.02, y0 + CEIL / 2, -16.45);
+      boxMesh(0.85, CEIL, 0.4, MAT.wall2, 2.02, y0 + CEIL / 2, -16.45);
+      collider(f, -2.45, -1.1, -16.65, -16.25);
+      collider(f, 1.1, 2.45, -16.65, -16.25);
+      // 층 표시등
+      var ind = makeIndicator();
+      var p = new T.Mesh(new T.PlaneGeometry(1.0, 0.38), new THREE.MeshBasicMaterial({ map: ind.t }));
+      p.position.set(0, y0 + 2.72, -16.24); scene.add(p);
+      ELEV.indicators.push(ind);
+      // 호출 버튼
+      boxMesh(0.16, 0.62, 0.26, MAT.steel, 2.15, y0 + 1.25, -16.28);
+      var btn = new T.Mesh(new T.CircleGeometry(0.06, 12), new T.MeshBasicMaterial({ color: 0xffd166 }));
+      btn.position.set(2.24, y0 + 1.25, -16.28); btn.rotation.y = -Math.PI / 2; scene.add(btn);
+      // 문짝 (좌/우)
+      var dl = boxMesh(1.12, 2.38, 0.09, MAT.elevDoor, -0.56, y0 + 1.21, -16.44);
+      var dr = boxMesh(1.12, 2.38, 0.09, MAT.elevDoor, 0.56, y0 + 1.21, -16.44);
+      ELEV.doorSets.push({ l: dl, r: dr, y0: y0 });
+    }
+
+    // 승강기 카
+    var cab = new T.Group();
+    function part(w, h, d, mat, x, y, z) {
+      var m = new T.Mesh(new T.BoxGeometry(w, h, d), mat);
+      m.position.set(x, y, z); m.castShadow = false; m.receiveShadow = true; cab.add(m); return m;
+    }
+    part(4.2, 0.12, 4.3, MAT.elevFloor, 0, 0.06, 0);
+    part(4.2, 0.1, 4.3, MAT.elevDoor, 0, 2.55, 0);
+    part(4.2, 2.5, 0.08, MAT.elev, 0, 1.3, -2.1);
+    part(0.08, 2.5, 4.2, MAT.elev, -2.06, 1.3, 0);
+    part(0.08, 2.5, 4.2, MAT.elev, 2.06, 1.3, 0);
+    // 손잡이
+    part(3.6, 0.06, 0.06, MAT.steel, 0, 1.05, -2.02);
+    part(0.06, 0.06, 3.6, MAT.steel, -1.98, 1.05, 0);
+    // 조작반
+    part(0.06, 1.0, 0.5, MAT.darkSteel, 1.99, 1.35, -1.5);
+    for (var b = 0; b < 3; b++) {
+      var bb = new T.Mesh(new T.CircleGeometry(0.055, 12), new T.MeshBasicMaterial({ color: b === 0 ? 0xffd166 : 0xdfe9ee }));
+      bb.position.set(1.95, 1.62 - b * 0.3, -1.5); bb.rotation.y = -Math.PI / 2; cab.add(bb);
+    }
+    // 반사 유리(뒷면)
+    var mirror = new T.Mesh(new T.PlaneGeometry(3.8, 2.2), new T.MeshStandardMaterial({ color: 0xdfeef5, metalness: 0.6, roughness: 0.15 }));
+    mirror.position.set(0, 1.35, -2.05); cab.add(mirror);
+    // 카 천장 조명
+    var cl = new T.Mesh(new T.PlaneGeometry(2.4, 2.4), new T.MeshBasicMaterial({ color: 0xfff8e0 }));
+    cl.rotation.x = Math.PI / 2; cl.position.y = 2.49; cab.add(cl);
+    var cabLight = new T.PointLight(0xfff3d8, 7, 8, 1.5);
+    cabLight.position.set(0, 2.3, 0.2);
+    cab.add(cabLight);
+    cab.position.set(X, 0, Z);
+    scene.add(cab);
+    ELEV.cab = cab;
+    ELEV.x = X; ELEV.z = Z;
+  }
+
+  function elevCall(floor) {
+    if (ELEV.moving) return;
+    if (ELEV.floor === floor) { ELEV.doorsOpen = true; return; }
+    ELEV.target = floor; ELEV.moving = true; ELEV.doorsOpen = false;
+  }
+
+  function updateElevator(dt) {
+    if (ELEV.waitFor > 0) {
+      ELEV.waitFor -= dt;
+      if (ELEV.waitFor <= 0 && ELEV.pendingTarget !== null) {
+        ELEV.target = ELEV.pendingTarget; ELEV.pendingTarget = null; ELEV.moving = true;
+      }
+    }
+    if (ELEV.moving) {
+      var ty = ELEV.target * FLOOR_H;
+      var d = ty - ELEV.y;
+      var step = 2.6 * dt;
+      if (Math.abs(d) <= step) {
+        ELEV.y = ty; ELEV.floor = ELEV.target; ELEV.moving = false; ELEV.doorsOpen = true;
+      } else {
+        ELEV.y += Math.sign(d) * step;
+      }
+    }
+    var targetT = ELEV.doorsOpen ? 1 : 0;
+    ELEV.doorT += clamp(targetT - ELEV.doorT, -dt * 3.2, dt * 3.2);
+    if (ELEV.cab) ELEV.cab.position.y = ELEV.y;
+    for (var i = 0; i < ELEV.doorSets.length; i++) {
+      var s = ELEV.doorSets[i];
+      var t = (ELEV.floor === i) ? ELEV.doorT : 0;
+      var off = 0.56 + t * 0.6;
+      s.l.position.x = -off; s.r.position.x = off;
+      // 문이 층에 맞춰 안 보이게 (다른 층 문은 닫힌 상태 유지)
+    }
+    for (var k = 0; k < ELEV.indicators.length; k++) {
+      drawIndicator(ELEV.indicators[k], ELEV.floor, ELEV.moving, ELEV.doorsOpen && ELEV.doorT > 0.5);
+    }
+  }
+
+  /* =====================================================================
+     10. 참빛관 (체육관)
+  ===================================================================== */
+  function buildGym() {
+    var H = 8;
+    // 서쪽 벽 (출입구 z -24..-22)
+    gymWallZ(G.z1, -24, 42.35, 0, H);
+    gymWallZ(-22, G.z2, 42.35, 0, H);
+    gymWallZ(G.z1, G.z2, 61.65, 0, H);
+    gymWallX(G.x1, G.x2, -33.65, 0, H);
+    gymWallX(G.x1, G.x2, -6.35, 0, H);
+    // 출입구 문틀
+    boxMesh(0.9, H - 3, 0.9, MAT.band, 42.35, 3 + (H - 3) / 2, -22);
+    boxMesh(0.9, H - 3, 0.9, MAT.band, 42.35, 3 + (H - 3) / 2, -24);
+    boxMesh(1.0, 0.5, 2.6, MAT.band, 42.35, 3.2, -23);
+    collider(0, 41.95, 42.75, -24.4, -23.9);
+    collider(0, 41.95, 42.75, -22.1, -21.6);
+
+    // 지붕
+    boxMesh(20.8, 0.5, 28.8, MAT.roof, 52, H + 0.25, -20);
+    boxMesh(21.4, 0.9, 0.6, MAT.trim, 52, H + 0.9, -33.7);
+    boxMesh(21.4, 0.9, 0.6, MAT.trim, 52, H + 0.9, -6.3);
+    boxMesh(0.6, 0.9, 28.8, MAT.trim, 41.5, H + 0.9, -20);
+    boxMesh(0.6, 0.9, 28.8, MAT.trim, 62.5, H + 0.9, -20);
+    // 천장
+    boxMesh(19.6, 0.12, 27.6, MAT.ceil, 52, H - 0.1, -20, false, false);
+
+    // 바닥 (농구 코트)
+    var court = new T.Mesh(new T.PlaneGeometry(18.6, 26), new T.MeshStandardMaterial({ map: TEX.court, roughness: 0.72 }));
+    court.rotation.x = -Math.PI / 2; court.position.set(52, 0.03, -20); court.receiveShadow = true; scene.add(court);
+
+    // 골대 2개
+    function hoop(z, dir) {
+      var pole = new T.Mesh(new T.CylinderGeometry(0.12, 0.14, 3.6, 10), MAT.darkSteel);
+      pole.position.set(52, 1.8, z - 0.9 * dir); pole.castShadow = true; scene.add(pole);
+      var arm = new T.Mesh(new T.BoxGeometry(0.14, 0.14, 1.0), MAT.darkSteel);
+      arm.position.set(52, 3.55, z - 0.45 * dir); scene.add(arm);
+      var board = boxMesh(1.8, 1.05, 0.08, MAT.white, 52, 3.5, z);
+      board.castShadow = false;
+      boxMesh(0.5, 0.4, 0.02, MAT.red, 52, 3.35, z + 0.05 * dir, false, false);
+      var rim = new T.Mesh(new T.TorusGeometry(0.23, 0.035, 6, 14), std(0xe0663a, 0.6, 0.4));
+      rim.rotation.x = Math.PI / 2; rim.position.set(52, 3.05, z + 0.35 * dir); scene.add(rim);
+      var net = new T.Mesh(new T.CylinderGeometry(0.22, 0.14, 0.42, 10, 3, true),
+        new T.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.6 }));
+      net.position.set(52, 2.82, z + 0.35 * dir); scene.add(net);
+      collider(0, 51.4, 52.6, z - 1.3 * dir - 0.2, z - 1.3 * dir + 0.2);
+    }
+    hoop(-32.2, -1);
+    hoop(-7.8, 1);
+
+    // 바닥 바탕 (틈새 방지)
+    boxMesh(20, 0.04, 28, std(0xd8cbb2, 0.95), 52, 0.005, -20, false, true);
+
+    // 무대
+    boxMesh(4.6, 0.7, 12, MAT.stage, 58.8, 0.35, -20);
+    boxMesh(4.8, 0.12, 12.2, MAT.wood, 58.8, 0.72, -20);
+    collider(0, 56.5, 61.2, -26.2, -13.8);
+    // 커튼
+    for (var cI = 0; cI < 8; cI++) {
+      boxMesh(0.35, 5.6, 1.2, MAT.curtain, 61.1, 3.1, -25.4 + cI * 1.5, false, false);
+    }
+    // 현수막
+    var bn = new T.Mesh(new T.PlaneGeometry(11.5, 2.46), new T.MeshStandardMaterial({ map: TEX.banner, roughness: 0.8 }));
+    bn.position.set(61.25, 5.6, -20); bn.rotation.y = -Math.PI / 2; scene.add(bn);
+
+    // 관람석 (남쪽 벽 쪽 계단식)
+    for (var s = 0; s < 3; s++) {
+      boxMesh(15, 0.5 + s * 0.45, 1.15, MAT.concrete, 50, (0.5 + s * 0.45) / 2, -9.7 + s * 1.15);
+      boxMesh(15, 0.1, 0.45, MAT.band, 50, 0.5 + s * 0.45 + 0.05, -10.1 + s * 1.15, false, false);
+    }
+    collider(0, 42.5, 57.5, -10.4, -6.9);
+    // 벤치
+    boxMesh(1.0, 0.42, 6, MAT.wood, 43.4, 0.21, -16);
+    // 농구공들
+    for (var bb2 = 0; bb2 < 3; bb2++) {
+      var b3 = new T.Mesh(new T.SphereGeometry(0.24, 14, 10), std(0xd97a2b, 0.75));
+      b3.position.set(46 + bb2 * 1.4, 0.24, -16 - bb2 * 2.2); b3.castShadow = true; scene.add(b3);
+    }
+    // 조명
+    var lm = new T.MeshBasicMaterial({ color: 0xfff8e0 });
+    for (var lz2 = -30; lz2 <= -10; lz2 += 6.5) {
+      for (var lx2 = 46; lx2 <= 58; lx2 += 6) {
+        var lp = new T.Mesh(new T.PlaneGeometry(2.2, 0.8), lm);
+        lp.rotation.x = Math.PI / 2; lp.position.set(lx2, H - 0.2, lz2); scene.add(lp);
+      }
+    }
+    // 체육관 간판 (서쪽 외벽)
+    var gs = new T.Mesh(new T.PlaneGeometry(6.4, 1.8), new T.MeshStandardMaterial({ map: TEX.gym, roughness: 0.7 }));
+    gs.position.set(41.88, 4.6, -23); gs.rotation.y = -Math.PI / 2; scene.add(gs);
+    boxMesh(0.3, 2.1, 6.8, MAT.band, 41.95, 4.6, -23, false, false);
+  }
+  function gymWallZ(z1, z2, x, y0, h) {
+    var d = z2 - z1;
+    boxMesh(0.7, h, d, MAT.wall, x, y0 + h / 2, (z1 + z2) / 2);
+    collider(0, x - 0.35, x + 0.35, z1, z2);
+    // 창 띠
+    boxMesh(0.12, 1.7, d * 0.92, MAT.glass, x, y0 + 5.6, (z1 + z2) / 2, false, false);
+    boxMesh(0.16, 0.12, d * 0.92, MAT.band, x, y0 + 6.5, (z1 + z2) / 2, false, false);
+    boxMesh(0.16, 0.12, d * 0.92, MAT.band, x, y0 + 4.7, (z1 + z2) / 2, false, false);
+  }
+  function gymWallX(x1, x2, z, y0, h) {
+    var w = x2 - x1;
+    boxMesh(w, h, 0.7, MAT.wall, (x1 + x2) / 2, y0 + h / 2, z);
+    collider(0, x1, x2, z - 0.35, z + 0.35);
+    boxMesh(w * 0.92, 1.7, 0.12, MAT.glass, (x1 + x2) / 2, y0 + 5.6, z, false, false);
+    boxMesh(w * 0.92, 0.12, 0.16, MAT.band, (x1 + x2) / 2, y0 + 6.5, z, false, false);
+    boxMesh(w * 0.92, 0.12, 0.16, MAT.band, (x1 + x2) / 2, y0 + 4.7, z, false, false);
+  }
+
+  /* 본관 ↔ 참빛관 연결 통로 */
+  function buildWalkway() {
+    boxMesh(6.2, 0.16, 3.6, MAT.concrete, 39, 0.08, -23);
+    boxMesh(6.2, 0.16, 3.6, MAT.roof, 39, 2.9, -23);
+    [-24.6, -21.4].forEach(function (z) {
+      boxMesh(6.2, 2.6, 0.12, MAT.glass, 39, 1.3, z, false, false);
+      boxMesh(6.2, 0.14, 0.16, MAT.trim, 39, 2.6, z);
+      collider(0, 35.9, 42.1, z - 0.08, z + 0.08);
+    });
+    boxMesh(0.16, 2.6, 3.2, MAT.trim, 42.05, 1.3, -23);
+    boxMesh(0.16, 2.6, 3.2, MAT.trim, 35.95, 1.3, -23);
+    // 통로 조명
+    var lm = new T.MeshBasicMaterial({ color: 0xfff8e0 });
+    for (var i = 0; i < 2; i++) {
+      var p = new T.Mesh(new T.PlaneGeometry(1.6, 0.4), lm);
+      p.rotation.x = Math.PI / 2; p.position.set(37 + i * 4, 2.82, -23); scene.add(p);
+    }
+  }
+
+  /* =====================================================================
+     11. 아바타
+  ===================================================================== */
+  var avatar = new T.Group();
+  var AV = {};
+  function buildAvatar() {
+    var skin = std(0xf6cfa9, 0.85), hairM = std(0x3a2a22, 0.9);
+    var top = std(0x2f6fb5, 0.85), top2 = std(0x9fd3ea, 0.85);
+    var bottom = std(0x3c4a5c, 0.9), shoe = std(0xf2f2f2, 0.8);
+    var body = new T.Group();
+    avatar.add(body);
+    AV.body = body;
+
+    function limb(w, h, d, mat, px, py, pz, isLeg) {
+      var g = new T.Group(); g.position.set(px, py, pz);
+      var m = new T.Mesh(new T.BoxGeometry(w, h, d), mat);
+      m.position.y = -h / 2; m.castShadow = true; g.add(m);
+      body.add(g);
+      if (isLeg) {
+        var s = new T.Mesh(new T.BoxGeometry(w * 1.15, 0.12, d * 1.5), shoe);
+        s.position.set(0, -h - 0.02, 0.04); s.castShadow = true; g.add(s);
+      }
+      return g;
+    }
+    AV.legL = limb(0.17, 0.6, 0.19, bottom, -0.13, 0.62, 0, true);
+    AV.legR = limb(0.17, 0.6, 0.19, bottom, 0.13, 0.62, 0, true);
+
+    var torso = new T.Mesh(new T.BoxGeometry(0.52, 0.56, 0.3), top);
+    torso.position.y = 0.9; torso.castShadow = true; body.add(torso);
+    var collar = new T.Mesh(new T.BoxGeometry(0.54, 0.09, 0.32), top2);
+    collar.position.y = 1.15; body.add(collar);
+    var belt = new T.Mesh(new T.BoxGeometry(0.53, 0.07, 0.31), std(0x22303c, 0.9));
+    belt.position.y = 0.63; body.add(belt);
+
+    AV.armL = limb(0.13, 0.5, 0.15, top, -0.33, 1.12, 0);
+    AV.armR = limb(0.13, 0.5, 0.15, top, 0.33, 1.12, 0);
+    var handL = new T.Mesh(new T.SphereGeometry(0.075, 8, 6), skin); handL.position.set(-0.33, 0.6, 0); body.add(handL);
+    var handR = new T.Mesh(new T.SphereGeometry(0.075, 8, 6), skin); handR.position.set(0.33, 0.6, 0); body.add(handR);
+
+    var head = new T.Mesh(new T.SphereGeometry(0.27, 20, 16), skin);
+    head.position.y = 1.44; head.castShadow = true; body.add(head);
+    var hairCap = new T.Mesh(new T.SphereGeometry(0.285, 18, 14, 0, Math.PI * 2, 0, Math.PI * 0.58), hairM);
+    hairCap.position.y = 1.45; body.add(hairCap);
+    var fringe = new T.Mesh(new T.SphereGeometry(0.2, 12, 10), hairM);
+    fringe.position.set(0, 1.6, 0.12); fringe.scale.set(1.35, 0.42, 0.9); body.add(fringe);
+    var knot = new T.Mesh(new T.SphereGeometry(0.1, 10, 8), hairM);
+    knot.position.set(0, 1.66, -0.22); body.add(knot);
+
+    [-1, 1].forEach(function (s) {
+      var eye = new T.Mesh(new T.SphereGeometry(0.036, 10, 8), std(0x1b1b1b, 0.4));
+      eye.position.set(0.1 * s, 1.46, 0.245); body.add(eye);
+      var cheek = new T.Mesh(new T.SphereGeometry(0.045, 8, 6), std(0xf5a3a3, 0.9));
+      cheek.position.set(0.17 * s, 1.36, 0.206); cheek.scale.set(1, 0.6, 0.4); body.add(cheek);
+    });
+    var mouth = new T.Mesh(new T.TorusGeometry(0.055, 0.014, 6, 10, Math.PI), std(0xb35a5a, 0.6));
+    mouth.position.set(0, 1.35, 0.253); mouth.rotation.z = Math.PI; body.add(mouth);
+
+    var pack = new T.Mesh(new T.BoxGeometry(0.36, 0.42, 0.18), std(0xe08a3a, 0.85));
+    pack.position.set(0, 0.95, -0.24); pack.castShadow = true; body.add(pack);
+    var packTop = new T.Mesh(new T.BoxGeometry(0.36, 0.1, 0.2), std(0xc9742c, 0.85));
+    packTop.position.set(0, 1.18, -0.24); body.add(packTop);
+
+    avatar.position.set(0, 0, 47);
+    scene.add(avatar);
+  }
+
+  /* =====================================================================
+     12. 플레이어 · 카메라
+  ===================================================================== */
+  var player = {
+    pos: new T.Vector3(0, 0, 47),
+    level: 0,
+    vy: 0, y: 0,
+    inCab: false,
+    yawFace: Math.PI,
+    speed: 0,
+    walkPhase: 0,
+    view: 'third'
+  };
+  var cam = { yaw: 0, pitch: 0.2, dist: 6.6, curDist: 6.6, cur: new T.Vector3() };
+  var keys = {};
+  var joy = { active: false, x: 0, y: 0, id: null };
+  var drag = { on: false, id: null, x: 0, y: 0 };
+  var RADIUS = 0.42;
+
+  function groundY() { return player.inCab ? ELEV.y : player.level * FLOOR_H; }
+
+  function resolveCollisions(p, lv) {
+    var list = colliders[lv];
+    for (var i = 0; i < list.length; i++) {
+      var c = list[i];
+      var cx = clamp(p.x, c.x1, c.x2), cz = clamp(p.z, c.z1, c.z2);
+      var dx = p.x - cx, dz = p.z - cz;
+      var d2 = dx * dx + dz * dz;
+      if (d2 > RADIUS * RADIUS) continue;
+      if (d2 > 1e-7) {
+        var d = Math.sqrt(d2);
+        p.x = cx + dx / d * RADIUS;
+        p.z = cz + dz / d * RADIUS;
+      } else {
+        var l = p.x - c.x1, r = c.x2 - p.x, b = p.z - c.z1, f = c.z2 - p.z;
+        var m = Math.min(l, r, b, f);
+        if (m === l) p.x = c.x1 - RADIUS;
+        else if (m === r) p.x = c.x2 + RADIUS;
+        else if (m === b) p.z = c.z1 - RADIUS;
+        else p.z = c.z2 + RADIUS;
+      }
+    }
+  }
+
+  function updatePlayer(dt) {
+    // 입력
+    var ix = 0, iz = 0;
+    if (keys['w'] || keys['arrowup']) iz -= 1;
+    if (keys['s'] || keys['arrowdown']) iz += 1;
+    if (keys['a'] || keys['arrowleft']) ix -= 1;
+    if (keys['d'] || keys['arrowright']) ix += 1;
+    if (joy.active) { ix += joy.x; iz += joy.y; }
+    var len = Math.hypot(ix, iz);
+    if (len > 1) { ix /= len; iz /= len; len = 1; }
+    var run = keys['shift'] ? 1.7 : 1;
+    var maxSpeed = 3.9 * run;
+
+    var fx = -Math.sin(cam.yaw), fz = -Math.cos(cam.yaw);
+    var rx = Math.cos(cam.yaw), rz = -Math.sin(cam.yaw);
+    var mx = (fx * (-iz) + rx * ix), mz = (fz * (-iz) + rz * ix);
+    var ml = Math.hypot(mx, mz);
+    if (ml > 1e-4) { mx /= ml; mz /= ml; }
+
+    var targetSpeed = len > 0.05 ? maxSpeed : 0;
+    player.speed = lerp(player.speed, targetSpeed, 1 - Math.pow(0.001, dt));
+    if (player.speed < 0.02) player.speed = 0;
+
+    var p = player.pos;
+    p.x += mx * player.speed * dt;
+    p.z += mz * player.speed * dt;
+
+    // 엘리베이터 처리
+    if (!player.inCab) {
+      var inShaftX = p.x > -2.15 && p.x < 2.15;
+      var openHere = (ELEV.floor === player.level) && ELEV.doorT > 0.45;
+      if (inShaftX && p.z < -16.45 && p.z > -21.2) {
+        if (openHere && p.z < -17.0) {
+          player.inCab = true; showElevPanel(true);
+        } else if (!openHere) {
+          p.z = -16.45;
+        }
+      }
+      resolveCollisions(p, player.level);
+    } else {
+      // 카 안에서
+      var openNow = ELEV.doorT > 0.5;
+      p.x = clamp(p.x, -1.9, 1.9);
+      p.z = clamp(p.z, -20.6, openNow ? -15.0 : -16.7);
+      player.level = ELEV.floor;
+      if (p.z > -16.55 && openNow) {
+        player.inCab = false; showElevPanel(false);
+        resolveCollisions(p, player.level);
+      }
+    }
+
+    // 점프
+    if ((keys[' '] || keys['space']) && player.y <= 0.001 && !player.inCab) { player.vy = 5.4; }
+    if (player.y > 0 || player.vy > 0) {
+      player.vy -= 17 * dt;
+      player.y += player.vy * dt;
+      if (player.y <= 0) { player.y = 0; player.vy = 0; }
+    }
+
+    // 아바타 반영
+    var gy = groundY();
+    avatar.position.set(p.x, gy + player.y, p.z);
+    if (player.speed > 0.15) {
+      player.walkPhase += dt * player.speed * 2.6;
+      var face = Math.atan2(mx, mz);
+      player.yawFace = face;
+    } else {
+      player.yawFace = Math.atan2(fx, fz);
+    }
+    // 부드러운 회전
+    var cur = avatar.rotation.y;
+    var diff = ((player.yawFace - cur + Math.PI) % (Math.PI * 2)) - Math.PI;
+    avatar.rotation.y = cur + diff * Math.min(1, dt * 12);
+
+    var sw = Math.sin(player.walkPhase) * 0.55 * (player.speed / maxSpeed);
+    AV.legL.rotation.x = sw; AV.legR.rotation.x = -sw;
+    AV.armL.rotation.x = -sw * 0.85; AV.armR.rotation.x = sw * 0.85;
+    AV.body.position.y = Math.abs(Math.sin(player.walkPhase)) * 0.05 * (player.speed > 0.2 ? 1 : 0);
+    avatar.visible = (player.view !== 'first');
+  }
+
+  function isIndoor(x, z) {
+    if (player.level > 0) return true;
+    if (x > B.x1 && x < B.x2 && z > B.z1 && z < B.z2) return true;
+    if (x > G.x1 - 1 && x < G.x2 + 1 && z > G.z1 && z < G.z2) return true;
+    if (x > 35 && x < 43 && z > -25.5 && z < -20.5) return true;
+    return false;
+  }
+
+  function cameraCollide(target, dir, dist, lv) {
+    var ray = new T.Ray(target, dir);
+    var maxD = dist;
+    var list = occluders[lv];
+    var tmp = new T.Vector3();
+    for (var i = 0; i < list.length; i++) {
+      var hit = ray.intersectBox(list[i], tmp);
+      if (hit) {
+        var d = target.distanceTo(hit) - 0.28;
+        if (d < maxD) maxD = d;
+      }
+    }
+    return Math.max(0.7, maxD);
+  }
+
+  function updateCamera(dt) {
+    var gy = groundY() + player.y;
+    var target = new T.Vector3(player.pos.x, gy + 1.4, player.pos.z);
+    cam.pitch = clamp(cam.pitch, -0.35, 1.15);
+
+    if (player.view === 'first') {
+      var eye = new T.Vector3(player.pos.x, gy + 1.5, player.pos.z);
+      eye.x += Math.sin(cam.yaw) * 0.12; eye.z += Math.cos(cam.yaw) * 0.12;
+      camera.position.copy(eye);
+      var look = new T.Vector3(
+        eye.x - Math.sin(cam.yaw) * Math.cos(cam.pitch),
+        eye.y - Math.sin(cam.pitch),
+        eye.z - Math.cos(cam.yaw) * Math.cos(cam.pitch)
+      );
+      camera.lookAt(look);
+      cam.curDist = 0;
+      return;
+    }
+
+    var want = player.inCab ? Math.min(cam.dist, 2.9) : (isIndoor(player.pos.x, player.pos.z) ? Math.min(cam.dist, 3.2) : cam.dist);
+    var cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
+    var dir = new T.Vector3(Math.sin(cam.yaw) * cp, sp, Math.cos(cam.yaw) * cp);
+    var allow = cameraCollide(target, dir, want, player.level);
+    cam.curDist = lerp(cam.curDist, allow, 1 - Math.pow(0.0001, dt));
+    var camPos = target.clone().add(dir.multiplyScalar(cam.curDist));
+    camPos.y = Math.max(camPos.y, gy + 0.45);
+    camera.position.copy(camPos);
+    camera.lookAt(target);
+  }
+
+  /* =====================================================================
+     13. 상호작용
+  ===================================================================== */
+  var interactables = [];
+  function addInteract(lv, x, z, r, label, run) {
+    interactables.push({ lv: lv, x: x, z: z, r: r, label: label, run: run });
+  }
+  var nearest = null;
+
+  function toast(text, ms) {
+    var t = $('toast');
+    $('toastTxt').innerHTML = text;
+    t.classList.add('on');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { t.classList.remove('on'); }, ms || 5200);
+  }
+
+  function setupInteractions() {
+    // 정문 교훈판
+    addInteract(0, 8.9, 46.6, 4.2, '교훈 안내판 보기', function () {
+      toast('<b>석화초등학교 교훈</b><br>사랑 · 상상 · 공감으로 내일을 열어가는 행복한 학교');
+    });
+    // 후문
+    addInteract(0, 0, -45.5, 4.5, '후문 안내 보기', function () {
+      toast('<b>후문 · 통학로</b><br>친구들과 함께 다닐 때는 한 줄로, 서행으로 안전하게!');
+    });
+    // 층별 교실 · 복도 · 엘리베이터 · 계단
+    for (var f = 0; f < 3; f++) {
+      var y0 = f * FLOOR_H;
+      [21.5, -21.5].forEach(function (cx) {
+        addInteract(f, cx, -19.2, 3.4, '칠판 읽기', function () {
+          toast('<b>칠판</b><br>홍천 석화초등학교<br>석화초 3D 메타버스에 오신 것을 환영합니다!<br><span style="color:#5b7a68">오늘도 신나게, 함께 걸어요</span>');
+        });
+      });
+      addInteract(f, 2.15, -16.2, 3.5, function () {
+        if (player.inCab) return '엘리베이터 문 열기';
+        if (ELEV.moving) return '엘리베이터 오는 중…';
+        var hereNow = ELEV.floor === player.level && ELEV.doorT > 0.45;
+        return hereNow ? '엘리베이터 타기' : '엘리베이터 호출';
+      }, function () {
+        if (player.inCab) { showElevPanel(true); return; }
+        if (ELEV.moving) return;
+        var here = ELEV.floor === player.level && ELEV.doorT > 0.45;
+        if (here) { player.inCab = true; player.pos.set(0, 0, -18.4); player.level = ELEV.floor; showElevPanel(true); }
+        else { elevCall(player.level); toast('🛗 엘리베이터를 불렀어요. 잠시만 기다려 주세요!', 3000); }
+      });
+      addInteract(f, 11.8, -26.4, 3.0, '계단 이용', function () {
+        var opts = [];
+        if (f < 2) opts.push({ label: '▲ ' + (f + 2) + '층으로', run: function () { teleport(f + 1, 11.8, -26.4, cam.yaw); } });
+        if (f > 0) opts.push({ label: '▼ ' + f + '층으로', run: function () { teleport(f - 1, 11.8, -26.4, cam.yaw); } });
+        showActionPanel('계단', opts);
+      });
+    }
+    addInteract(0, -15, -23.6, 3.2, '알림판 읽기', function () {
+      toast('<b>석화초 알림판</b><br>· 11월: 가을 운동회 · 참빛관 체육한마당<br>· 도서실(2층) 신간 도서 입고<br>· 축구부 · 농구부 신입 단원 모집 중<br>· 복도에서는 천천히 걸어요');
+    });
+    addInteract(0, -7.2, -13.4, 2.6, '층 안내 보기', function () {
+      toast('<b>층 안내</b><br>1F 로비 · 1학년 교실<br>2F 2학년 교실 · 도서실<br>3F 3학년 교실 · 과학실');
+    });
+    addInteract(0, 56.5, -20, 4.2, '참빛관 무대 보기', function () {
+      toast('<b>참빛관 체육관</b><br>함께 뛰는 우리, 빛나는 오늘!<br>농구 골대 2개와 무대가 있는 실내 체육관이에요.');
+    });
+  }
+
+  /* =====================================================================
+     14. 순간이동 · 페이드
+  ===================================================================== */
+  function fade(on, cb) {
+    var f = $('fade');
+    if (on) { f.classList.add('on'); setTimeout(cb, 290); }
+    else { f.classList.remove('on'); }
+  }
+  function teleport(lv, x, z, yaw, instant) {
+    var go = function () {
+      player.level = lv;
+      player.pos.set(x, 0, z);
+      player.y = 0; player.vy = 0; player.speed = 0;
+      player.inCab = false;
+      showElevPanel(false);
+      if (yaw !== undefined && yaw !== null) cam.yaw = yaw;
+      cam.curDist = cam.dist;
+      updateCamera(0.016);
+      cam.curDist = cameraCollide(
+        new T.Vector3(x, lv * FLOOR_H + 1.4, z),
+        new T.Vector3(Math.sin(cam.yaw) * Math.cos(cam.pitch), Math.sin(cam.pitch), Math.cos(cam.yaw) * Math.cos(cam.pitch)),
+        cam.dist, lv);
+      updateCamera(0.016);
+    };
+    if (instant || (lv === player.level && Math.abs(player.pos.x - x) < 0.1 && Math.abs(player.pos.z - z) < 0.1)) { go(); return; }
+    fade(true, function () { go(); fade(false); });
+  }
+
+  var WARPS = [
+    { ic: '🚪', name: '정문', lv: 0, x: 0, z: 47.6, yaw: Math.PI },
+    { ic: '⚽', name: '잔디 운동장', lv: 0, x: 0, z: 25, yaw: 0 },
+    { ic: '🏫', name: '본관 로비', lv: 0, x: 0, z: -14.2, yaw: 0 },
+    { ic: '🛗', name: '엘리베이터', lv: 0, x: 0, z: -14.4, yaw: 0 },
+    { ic: '📚', name: '2층 교실', lv: 1, x: 21.5, z: -17.5, yaw: 0 },
+    { ic: '🏀', name: '참빛관(체육관)', lv: 0, x: 52, z: -14.5, yaw: 0 },
+    { ic: '🌿', name: '후문', lv: 0, x: 0, z: -43.5, yaw: 0 }
+  ];
+
+  /* =====================================================================
+     15. UI
+  ===================================================================== */
+  var actPanel = null;
+  function showActionPanel(title, opts) {
+    if (!actPanel) {
+      actPanel = document.createElement('div');
+      actPanel.id = 'actPanel';
+      actPanel.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:calc(28px + env(safe-area-inset-bottom));z-index:21;' +
+        'background:rgba(255,255,255,.96);border-radius:18px;box-shadow:0 6px 22px rgba(20,60,45,.18);padding:14px;width:min(280px,84vw);text-align:center';
+      document.body.appendChild(actPanel);
+    }
+    actPanel.innerHTML = '<div style="font-weight:800;font-size:14px;margin-bottom:10px">' + title + '</div>';
+    opts.forEach(function (o) {
+      var b = document.createElement('button');
+      b.className = 'elevBtn';
+      b.style.cssText = 'display:block;width:100%;margin:6px 0';
+      b.textContent = o.label;
+      b.onclick = function () { actPanel.style.display = 'none'; o.run(); };
+      actPanel.appendChild(b);
+    });
+    var close = document.createElement('div');
+    close.style.cssText = 'margin-top:8px;font-size:11px;color:#4b6157;cursor:pointer';
+    close.textContent = '닫기';
+    close.onclick = function () { actPanel.style.display = 'none'; };
+    actPanel.appendChild(close);
+    actPanel.style.display = 'block';
+  }
+
+  function showElevPanel(v) {
+    var p = $('elevPanel');
+    p.classList.toggle('hidden', !v);
+    if (v) updateElevPanel(true);
+  }
+  function buildElevPanel() {
+    var row = $('elevRow');
+    row.innerHTML = '';
+    [2, 1, 0].forEach(function (f) {
+      var b = document.createElement('button');
+      b.className = 'elevBtn';
+      b.dataset.f = f;
+      b.textContent = (f + 1) + '층';
+      b.onclick = function () {
+        if (f === ELEV.floor) { ELEV.doorsOpen = true; return; }
+        ELEV.doorsOpen = false; ELEV.pendingTarget = f; ELEV.waitFor = 0.7;
+      };
+      row.appendChild(b);
+    });
+  }
+  function updateElevPanel(force) {
+    if (ELEV.pendingTarget === undefined) ELEV.pendingTarget = null;
+    var status = ELEV.moving ? '이동 중…' : (ELEV.doorT > 0.85 ? '문 열림' : (ELEV.doorT > 0.05 ? '문 여닫는 중' : '문 닫힘'));
+    var disp = $('elevDisp');
+    var txt = (ELEV.floor + 1) + 'F<small>' + status + '</small>';
+    if (disp._last !== txt) { disp.innerHTML = txt; disp._last = txt; }
+    var btns = $('elevRow').children;
+    for (var i = 0; i < btns.length; i++) {
+      var f = parseInt(btns[i].dataset.f, 10);
+      btns[i].classList.toggle('cur', f === ELEV.floor);
+    }
+  }
+
+  function updatePrompt() {
+    var best = null, bestD = 1e9, label = null;
+    if (!player.inCab) {
+      for (var i = 0; i < interactables.length; i++) {
+        var it = interactables[i];
+        if (it.lv !== player.level) continue;
+        var d = Math.hypot(player.pos.x - it.x, player.pos.z - it.z);
+        if (d < it.r && d < bestD) {
+          var lb = typeof it.label === 'function' ? it.label() : it.label;
+          if (!lb) continue;
+          bestD = d; best = it; label = lb;
+        }
+      }
+    }
+    nearest = best;
+    var p = $('prompt');
+    if (best) {
+      if (p._label !== label) { $('promptTxt').textContent = label; p._label = label; }
+      p.classList.add('on');
+    } else {
+      p.classList.remove('on');
+    }
+    var eb = $('btnAct');
+    if (eb) eb.style.background = best ? 'var(--yellow)' : 'rgba(255,255,255,.92)';
+    if (eb) eb.style.color = best ? '#4a3300' : 'var(--green-d)';
+  }
+
+  /* ---- 미니맵 ---- */
+  var mapStatic = null;
+  function drawMinimapStatic() {
+    var W = 380, H = 340, s = Math.min(W / 128, H / 112);
+    var c = cvs(W, H), g = c.getContext('2d');
+    g.save(); g.translate(W / 2, H / 2); g.scale(s, s);
+    g.fillStyle = '#e9f5dd'; g.fillRect(-64, -56, 128, 112);
+    g.fillStyle = '#c4766b'; rr(g, TRACK.x1, TRACK.z1, TRACK.x2, TRACK.z2, 15); g.fill();
+    g.fillStyle = '#8ed07c'; rr(g, PITCH.x1, PITCH.z1, PITCH.x2, PITCH.z2, 9); g.fill();
+    g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 0.7;
+    g.strokeRect(PITCH.x1, PITCH.z1, PITCH.x2 - PITCH.x1, PITCH.z2 - PITCH.z1);
+    g.fillStyle = '#d9d3c6';
+    g.fillRect(-30, -10, 60, 6); g.fillRect(-5.2, 44, 10.4, 8);
+    g.fillRect(-4.5, -48, 9, 18); g.fillRect(34, -34, 8, 28);
+    g.fillStyle = '#f6efe3'; g.strokeStyle = '#bfae94'; g.lineWidth = 0.6;
+    g.fillRect(B.x1, B.z1, 72, 20); g.strokeRect(B.x1, B.z1, 72, 20);
+    g.fillStyle = '#e9d9bf'; g.fillRect(G.x1, G.z1, 20, 28); g.strokeRect(G.x1, G.z1, 20, 28);
+    g.fillStyle = '#ffffff'; g.fillRect(36, -24.5, 6, 3);
+    g.fillStyle = '#2f9e62'; g.fillRect(-7.8, 50.6, 15.6, 2.4); g.fillRect(-4.5, -49.4, 9, 2.4);
+    g.fillStyle = '#3c6b4f';
+    g.beginPath(); g.moveTo(-1, -15.5); g.lineTo(1, -15.5); g.lineTo(0, -13.6); g.fill();
+    g.restore();
+
+    // 라벨 (화면 좌표)
+    function lab(txt, x, z, color) {
+      g.fillStyle = color || '#3c6b4f';
+      g.font = '700 11px ' + KFONT; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(txt, W / 2 + x * s, H / 2 + z * s);
+    }
+    lab('운 동 장', 0, 24);
+    lab('본 관', 0, -20);
+    lab('참빛관', 52, -21);
+    lab('정문', 0, 49.5);
+    lab('후문', 0, -45.5);
+    return c;
+  }
+  function drawMinimap() {
+    var el = $('minimap');
+    if (!el || !mapStatic) return;
+    var g = el.getContext('2d');
+    var W = el.width, H = el.height, s = Math.min(W / 128, H / 112);
+    g.clearRect(0, 0, W, H);
+    g.drawImage(mapStatic, 0, 0);
+    // 시야 부채꼴
+    var px = W / 2 + player.pos.x * s, pz = H / 2 + player.pos.z * s;
+    g.save();
+    g.translate(px, pz); g.rotate(-cam.yaw);
+    var grd = g.createRadialGradient(0, 0, 2, 0, 0, 46);
+    grd.addColorStop(0, 'rgba(47,158,98,.34)'); grd.addColorStop(1, 'rgba(47,158,98,0)');
+    g.fillStyle = grd;
+    g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, 46, -Math.PI / 2 - 0.55, -Math.PI / 2 + 0.55); g.closePath(); g.fill();
+    g.fillStyle = '#ffffff'; g.strokeStyle = '#1f7a4a'; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(0, -8); g.lineTo(5.6, 6); g.lineTo(0, 3); g.lineTo(-5.6, 6); g.closePath();
+    g.fill(); g.stroke();
+    g.restore();
+    // 층 표시
+    g.fillStyle = 'rgba(34,48,42,.82)';
+    g.font = '800 12px ' + KFONT; g.textAlign = 'left'; g.textBaseline = 'top';
+    var fl = player.inCab ? '🛗 엘리베이터' : ((player.level + 1) + '층');
+    if (!player.inCab && player.level === 0 && player.pos.z > -9.5) fl = '야외';
+    g.fillText(fl, 8, 8);
+  }
+
+  function buildWarpUI() {
+    var list = $('warpList');
+    list.innerHTML = '';
+    WARPS.forEach(function (w) {
+      var b = document.createElement('button');
+      b.className = 'warpBtn';
+      b.innerHTML = '<span class="ic">' + w.ic + '</span><span>' + w.name + '</span>';
+      b.onclick = function () { teleport(w.lv, w.x, w.z, w.yaw); };
+      list.appendChild(b);
+    });
+    $('warpToggle').onclick = function () {
+      $('warpPanel').classList.toggle('hidden');
+    };
+  }
+
+  function setView(v) {
+    player.view = v;
+    var label = v === 'first' ? '👁 1인칭' : '👁 3인칭';
+    $('viewBtn2').textContent = label;
+    $('btnView').textContent = v === 'first' ? '🎥' : '👁';
+  }
+  function toggleView() { setView(player.view === 'third' ? 'first' : 'third'); }
+
+  /* =====================================================================
+     16. 입력
+  ===================================================================== */
+  function setupInput() {
+    window.addEventListener('keydown', function (e) {
+      var k = e.key.toLowerCase();
+      if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].indexOf(k) >= 0) e.preventDefault();
+      keys[k] = true;
+      if (k === 'shift') keys['shift'] = true;
+      if (k === 'e') { if (nearest) nearest.run(); }
+      if (k === 'v') toggleView();
+      if (k === 'escape') {
+        $('warpPanel').classList.add('hidden');
+        if (actPanel) actPanel.style.display = 'none';
+      }
+    });
+    window.addEventListener('keyup', function (e) { keys[e.key.toLowerCase()] = false; });
+    window.addEventListener('blur', function () { keys = {}; });
+
+    var dom = renderer.domElement;
+    dom.addEventListener('pointerdown', function (e) {
+      if (drag.on) return;
+      drag.on = true; drag.id = e.pointerId; drag.x = e.clientX; drag.y = e.clientY;
+      try { dom.setPointerCapture(e.pointerId); } catch (x) { }
+    });
+    dom.addEventListener('pointermove', function (e) {
+      if (!drag.on || e.pointerId !== drag.id) return;
+      var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      drag.x = e.clientX; drag.y = e.clientY;
+      cam.yaw -= dx * 0.0036;
+      cam.pitch = clamp(cam.pitch + dy * 0.0030, -0.35, 1.15);
+    });
+    function endDrag(e) {
+      if (e.pointerId === drag.id) { drag.on = false; drag.id = null; }
+    }
+    dom.addEventListener('pointerup', endDrag);
+    dom.addEventListener('pointercancel', endDrag);
+    dom.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      cam.dist = clamp(cam.dist + Math.sign(e.deltaY) * 0.6, 3.2, 13);
+    }, { passive: false });
+
+    /* 조이스틱 */
+    var zone = $('joyZone'), knob = $('joyKnob');
+    var R = 46;
+    function setKnob(dx, dy) {
+      knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+    }
+    zone.addEventListener('pointerdown', function (e) {
+      joy.active = true; joy.id = e.pointerId;
+      try { zone.setPointerCapture(e.pointerId); } catch (x) { }
+      moveJoy(e);
+      e.preventDefault();
+    });
+    zone.addEventListener('pointermove', function (e) {
+      if (!joy.active || e.pointerId !== joy.id) return;
+      moveJoy(e);
+      e.preventDefault();
+    });
+    function moveJoy(e) {
+      var r = zone.getBoundingClientRect();
+      var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      var dx = e.clientX - cx, dy = e.clientY - cy;
+      var d = Math.hypot(dx, dy);
+      if (d > R) { dx = dx / d * R; dy = dy / d * R; d = R; }
+      setKnob(dx, dy);
+      joy.x = dx / R; joy.y = dy / R;
+    }
+    function endJoy(e) {
+      if (e.pointerId === joy.id) { joy.active = false; joy.id = null; joy.x = 0; joy.y = 0; setKnob(0, 0); }
+    }
+    zone.addEventListener('pointerup', endJoy);
+    zone.addEventListener('pointercancel', endJoy);
+
+    $('btnJump').addEventListener('pointerdown', function (e) { e.preventDefault(); if (player.y <= 0.01 && !player.inCab) player.vy = 5.4; });
+    $('btnAct').addEventListener('pointerdown', function (e) { e.preventDefault(); if (nearest) nearest.run(); });
+    $('btnView').addEventListener('pointerdown', function (e) { e.preventDefault(); toggleView(); });
+    $('viewBtn2').addEventListener('click', toggleView);
+
+    window.addEventListener('resize', onResize);
+  }
+  function onResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  }
+  function isTouch() {
+    return ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.matchMedia('(hover: none)').matches;
+  }
+
+  /* =====================================================================
+     17. 루프 · 시작
+  ===================================================================== */
+  var clock = new T.Clock();
+  var frameCount = 0;
+
+  function animate() {
+    requestAnimationFrame(animate);
+    var dt = Math.min(clock.getDelta(), 0.05);
+    updatePlayer(dt);
+    updateElevator(dt);
+    updateCamera(dt);
+    updatePrompt();
+    if (frameCount % 3 === 0) drawMinimap();
+    if (!$('elevPanel').classList.contains('hidden')) updateElevPanel();
+    frameCount++;
+    renderer.render(scene, camera);
+  }
+
+  function start() {
+    buildMain();
+    buildDeskInstances();
+    buildGate();
+    buildFences();
+    buildTrees();
+    buildFieldStuff();
+    buildGym();
+    buildWalkway();
+    buildElevator();
+    buildAvatar();
+    setupInteractions();
+    buildElevPanel();
+    setupInput();
+    buildWarpUI();
+    mapStatic = drawMinimapStatic();
+    setView('third');
+
+    player.pos.set(0, 0, 43.5);
+    player.level = 0;
+    cam.yaw = 0; cam.pitch = 0.2;
+    updateCamera(0.016);
+
+    if (isTouch()) {
+      $('joyZone').classList.remove('hidden');
+      $('touchBtns').classList.remove('hidden');
+    } else {
+      setTimeout(function () { $('hint').classList.add('gone'); }, 14000);
+    }
+    animate();
+
+    setTimeout(function () {
+      $('loading').classList.add('gone');
+      setTimeout(function () { $('loading').style.display = 'none'; }, 600);
+    }, 320);
+
+    // 테스트/디버그용
+    window.MV = {
+      warp: function (i) { var w = WARPS[i]; teleport(w.lv, w.x, w.z, w.yaw); },
+      warpByName: function (n) {
+        for (var i = 0; i < WARPS.length; i++) if (WARPS[i].name === n) { this.warp(i); return true; }
+        return false;
+      },
+      tp: function (lv, x, z, yaw, instant) { teleport(lv, x, z, yaw, instant); },
+      interact: function () { if (nearest) nearest.run(); },
+      view: function (v) { setView(v); },
+      state: player, cam: cam, elev: ELEV,
+      scene: scene, camera: camera, renderer: renderer,
+      prompt: function () { return nearest ? (typeof nearest.label === 'function' ? nearest.label() : nearest.label) : null; },
+      toasts: function () { return $('toastTxt').innerHTML; },
+      frames: function () { return frameCount; },
+      elevGo: function (f) { elevCall(f); },
+      version: '1.0'
+    };
+    window.__ready = true;
+  }
+
+  try {
+    start();
+  } catch (err) {
+    window.__errors.push('start: ' + (err && err.stack ? err.stack : err));
+    var card = $('errCard');
+    if (card) {
+      card.innerHTML = '<div style="font-size:34px;margin-bottom:8px">🏫⚠️</div><b>3D 화면을 여는 중 문제가 생겼어요.</b><br>페이지를 새로고침해 주세요.<br><span style="font-size:11px;color:#7a8b81">' + String(err && err.message ? err.message : err) + '</span>';
+      $('err').classList.remove('hidden');
+      $('loading').style.display = 'none';
+    }
+    throw err;
+  }
+}
+</script>
+<script>
+(function () {
+  var CDNS = [
+    'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js',
+    'https://unpkg.com/three@0.160.0/build/three.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js'
+  ];
+  var loading = document.getElementById('loading');
+  function fail() {
+    if (loading) loading.style.display = 'none';
+    var el = document.getElementById('err');
+    if (el) {
+      document.getElementById('errCard').innerHTML = '<div style="font-size:34px;margin-bottom:8px">📡</div><b>3D 라이브러리를 불러오지 못했어요.</b><br>인터넷 연결을 확인한 뒤 새로고침해 주세요.';
+      el.classList.remove('hidden');
+    }
+  }
+  function load(i) {
+    if (i >= CDNS.length) { fail(); return; }
+    var s = document.createElement('script');
+    s.src = CDNS[i];
+    s.async = false;
+    s.onload = function () { if (window.THREE) { try { boot(); } catch (e) { console.error(e); } } else { load(i + 1); } };
+    s.onerror = function () { load(i + 1); };
+    document.head.appendChild(s);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { load(0); });
+  else load(0);
+})();
+</script>
+</body>
+</html>
