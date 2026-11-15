@@ -2582,10 +2582,12 @@ function boot(){
     var url;
     try {
       var u = new URL(location.href);
+      u.search = '';
+      u.hash = '';
       u.searchParams.set('room', MP.room || '1반');
       url = u.toString();
     } catch (e) {
-      url = location.href.split('?')[0] + '?room=' + encodeURIComponent(MP.room || '1반');
+      url = location.href.split('?')[0].split('#')[0] + '?room=' + encodeURIComponent(MP.room || '1반');
     }
     var done = function (ok) {
       toast((ok ? '🔗 <b>초대 링크를 복사했어요</b>' : '🔗 <b>이 링크로 들어오면 같은 방이에요</b>') +
