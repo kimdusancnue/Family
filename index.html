@@ -1,0 +1,1803 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFF9E6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>우리 가족 기록장</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FFF9E6;
+    --cream2:#FFFDF5;
+    --ink:#5B4636;
+    --ink-soft:#8A7561;
+    --ink-mute:#A5947F;
+    --pink:#FF8FAE;
+    --coral:#C08A64;
+    --line:#EFE3D1;
+    --shadow:0 8px 20px rgba(190,155,110,.13);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:'Gowun Dodum','Noto Sans KR',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic','Segoe UI',sans-serif;
+    color:var(--ink);
+    line-height:1.45;
+    letter-spacing:-.2px;
+    word-break:keep-all;
+    overflow-wrap:break-word;
+    -webkit-tap-highlight-color:transparent;
+    background-color:#FFF9E6;
+    background-image:linear-gradient(180deg,#FFF8E3 0%,#FFFCF2 46%,#FFF6E6 100%);
+    background-attachment:fixed;
+  }
+  body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:0;
+    background:
+      radial-gradient(200px 200px at 92% 0%,rgba(255,214,224,.55),rgba(255,214,224,0) 70%),
+      radial-gradient(240px 240px at 0% 26%,rgba(214,240,220,.5),rgba(214,240,220,0) 70%),
+      radial-gradient(220px 220px at 100% 78%,rgba(255,232,196,.55),rgba(255,232,196,0) 70%);
+  }
+  .app{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:430px;
+    margin:0 auto;
+    padding:calc(env(safe-area-inset-top,0px) + 14px) 16px calc(env(safe-area-inset-bottom,0px) + 40px);
+  }
+
+  /* ---------- header ---------- */
+  .top-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .brand{display:flex;align-items:center;gap:7px;min-width:0}
+  .logo{width:34px;height:34px;flex:0 0 auto;animation:bob 4.5s ease-in-out infinite}
+  .logo svg{width:100%;height:100%;display:block}
+  .title{margin:0;font-size:clamp(20px,6.1vw,26px);font-weight:700;letter-spacing:-1.2px;white-space:nowrap}
+  .title .t1{color:var(--coral)}
+  .title .t2{color:var(--pink)}
+  .top-actions{display:flex;gap:8px;flex:0 0 auto}
+  .icon-btn{
+    width:44px;height:44px;border-radius:16px;border:0;background:#fff;
+    box-shadow:0 4px 12px rgba(190,155,110,.18);
+    font-size:17px;line-height:1;display:grid;place-items:center;cursor:pointer;
+    position:relative;transition:transform .12s;
+    color:var(--ink);
+  }
+  .icon-btn:active{transform:scale(.94)}
+  .icon-btn .dot{position:absolute;right:10px;top:11px;width:7px;height:7px;border-radius:50%;background:#7FC48A;box-shadow:0 0 0 2px #fff}
+  .date-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin:14px 2px 16px;flex-wrap:wrap}
+  .today{margin:0;font-size:16.5px;color:var(--ink-soft)}
+  .today b{color:#6B5644;font-weight:700;letter-spacing:-.4px}
+  .subtitle{margin:3px 0 0;font-size:13.5px;color:var(--ink-mute)}
+  .chip{
+    border:0;background:#FFFDF7;border-radius:999px;padding:9px 14px;font:inherit;font-size:12.5px;
+    color:var(--ink-soft);box-shadow:0 3px 10px rgba(190,155,110,.15);cursor:pointer;white-space:nowrap;
+    transition:transform .12s;
+  }
+  .chip:active{transform:scale(.96)}
+
+  /* ---------- weather ---------- */
+  .weather{
+    background:linear-gradient(140deg,#FFFDF7,#FFF7EA);
+    border:1px solid rgba(255,238,210,.95);
+    border-radius:22px;padding:12px 14px;
+    box-shadow:0 6px 18px rgba(200,170,120,.13);
+    cursor:pointer;
+  }
+  .w-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .w-icon{width:40px;height:40px;flex:0 0 auto}
+  .w-icon svg{width:100%;height:100%;display:block}
+  .w-city{font-size:15px;color:#7D6A57}
+  .w-temp{font-size:25px;font-weight:700;letter-spacing:-1px;color:#4E3D2E;margin-left:2px}
+  .w-desc{font-size:13px;color:var(--ink-soft)}
+  .w-range{font-size:12.5px;color:var(--ink-mute)}
+  .w-bot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:9px;flex-wrap:wrap}
+  .w-badges{display:flex;gap:6px;flex-wrap:wrap}
+  .badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:4px 9px;font-size:11.5px;border:1px solid #EFE3D1;background:#F7F2E9;color:var(--ink-mute)}
+  .badge.good{background:#E7F6EA;border-color:#CBEBD3;color:#5F9B6E}
+  .badge.ok{background:#FFF7DE;border-color:#F3E4B8;color:#A08942}
+  .badge.bad{background:#FFECE6;border-color:#F8D6C9;color:#C8765B}
+  .badge.verybad{background:#FDE3E3;border-color:#F6C9C9;color:#C05B5B}
+  .advice{
+    border:1px solid #F3E7D6;background:#FFFDF8;border-radius:999px;padding:5px 11px;
+    font:inherit;font-size:12px;color:#8A6F4E;white-space:nowrap;cursor:pointer;
+  }
+  .w-note{font-size:10.5px;color:#BCAC97;margin-top:6px}
+
+  /* ---------- family ---------- */
+  .stack{display:flex;flex-direction:column;gap:14px;margin-top:14px}
+  .family{
+    background:linear-gradient(165deg,#E9F7EC,#DFF1E5 60%,#E6F4E6);
+    border-radius:26px;padding:11px;
+    box-shadow:0 10px 22px rgba(130,175,140,.16),inset 0 0 0 1px rgba(255,255,255,.7);
+    display:flex;flex-direction:column;gap:10px;
+  }
+  .member{
+    position:relative;display:flex;align-items:center;gap:10px;
+    background:rgba(255,255,255,.94);
+    border-radius:20px;padding:10px 12px 10px 10px;
+    box-shadow:0 4px 12px rgba(140,170,150,.15);
+    border:1px solid rgba(255,255,255,.9);
+    cursor:pointer;transition:transform .12s;
+    overflow:hidden;
+  }
+  .member:active{transform:scale(.985)}
+  .avatar{width:58px;height:58px;flex:0 0 auto;border-radius:18px;background:#FFFDF6;box-shadow:0 3px 8px rgba(190,160,120,.18);overflow:hidden}
+  .avatar svg{width:100%;height:100%;display:block}
+  .m-info{flex:1 1 auto;min-width:0}
+  .m-name{font-size:19px;font-weight:700;letter-spacing:-.6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .m-sub{font-size:11.5px;color:var(--ink-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+  .m-right{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+  .star-row{display:flex;align-items:center;gap:5px}
+  .mini{
+    width:24px;height:24px;border-radius:50%;border:1px solid #F0E3D2;background:#FFFDF8;
+    color:#B08E6C;font-size:14px;line-height:1;display:grid;place-items:center;cursor:pointer;padding:0;
+    transition:transform .12s,background .15s;
+  }
+  .mini:active{transform:scale(.9);background:#FFF4E4}
+  .star-badge{display:flex;align-items:center;gap:3px;font-size:19px;font-weight:700;color:var(--ink);min-width:46px;justify-content:center}
+  .star-ico{width:19px;height:19px;display:block;flex:0 0 auto}
+  .flame-ico{width:14px;height:14px;display:block;flex:0 0 auto}
+  .star-badge .num{font-variant-numeric:tabular-nums}
+  .piggy{
+    border:1px solid #FFDCE3;background:#FFF4F6;border-radius:999px;padding:4px 9px;
+    font:inherit;font-size:11.5px;color:#DE7A93;display:inline-flex;align-items:center;gap:3px;
+    cursor:pointer;white-space:nowrap;transition:transform .12s;
+  }
+  .piggy:active{transform:scale(.95)}
+  .float{position:absolute;right:46px;top:6px;font-size:13.5px;font-weight:700;color:#E7A33C;pointer-events:none;animation:floatUp .95s ease-out forwards;z-index:5}
+
+  /* ---------- cards shared ---------- */
+  .card-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .head-title{display:flex;align-items:center;gap:7px;font-size:17px;font-weight:700;letter-spacing:-.5px}
+  .head-emoji{font-size:18px;line-height:1}
+  .pill-badge{
+    display:inline-flex;align-items:center;gap:5px;background:#FFFDF8;border-radius:999px;
+    padding:5px 11px;font-size:12px;color:#A9784E;box-shadow:inset 0 0 0 1px #F6E4CE;white-space:nowrap;
+  }
+  .pill-badge.hot{color:#D9743F;box-shadow:inset 0 0 0 1px #FFDCC0;background:#FFF6EC}
+  .guide{margin:8px 1px 0;font-size:12.5px;color:var(--ink-mute);line-height:1.5}
+
+  /* ---------- stamp board ---------- */
+  .stamp-card{
+    background:linear-gradient(160deg,#FFF9FB,#FFF4F8 48%,#FFF8F0);
+    border-radius:26px;padding:14px;
+    box-shadow:0 8px 20px rgba(220,170,190,.16);
+    position:relative;
+  }
+  .slots{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:13px 0 11px}
+  .slot-col{display:flex;flex-direction:column;align-items:center;gap:5px}
+  .wd{font-size:11px;color:#B3A28D}
+  .wd.sun{color:#E2909F}
+  .slot{
+    width:100%;aspect-ratio:1/1;border-radius:50%;
+    border:2px dashed #EEDCC6;background:#FFFDF8;
+    display:grid;place-items:center;padding:0;cursor:pointer;position:relative;overflow:hidden;
+    transition:transform .12s,border-color .2s,background .2s;
+  }
+  .slot:active{transform:scale(.93)}
+  .slot.future{border-color:#F4EBE0;background:#FFFCF7;opacity:.9}
+  .slot.today{border-color:#FFC7D5;box-shadow:0 0 0 3px rgba(255,199,213,.42),0 0 0 6px rgba(255,255,255,.65)}
+  .slot.stamped{border-style:solid;border-color:#FFE0E6;background:#FFFAFB}
+  .slot svg{width:100%;height:100%;display:block}
+  .slot.pop svg{animation:stampPop .46s cubic-bezier(.2,1.5,.35,1)}
+  .stamp-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .count-text{font-size:12.5px;color:var(--ink-soft);background:#FFFDF8;border-radius:999px;padding:7px 12px;box-shadow:inset 0 0 0 1px #F3E7D6}
+  .cal-btn{
+    border:0;background:#fff;border-radius:999px;padding:8px 13px;font:inherit;font-size:12.5px;color:#7D6A57;
+    box-shadow:0 3px 10px rgba(190,155,110,.16);cursor:pointer;white-space:nowrap;display:inline-flex;gap:5px;align-items:center;
+    transition:transform .12s;
+  }
+  .cal-btn:active{transform:scale(.96)}
+
+  /* ---------- mission ---------- */
+  .mission{
+    background:linear-gradient(150deg,#FFF2EC,#FFEAD9 55%,#FFF8EC);
+    border-radius:26px;padding:15px 14px 13px;
+    box-shadow:0 8px 20px rgba(230,180,140,.16);
+    position:relative;
+  }
+  .mission-body{display:flex;align-items:center;gap:12px;margin:12px 2px 14px;min-height:52px}
+  .mission-emoji{font-size:36px;line-height:1;animation:bob 3.6s ease-in-out infinite;filter:drop-shadow(0 4px 6px rgba(190,140,90,.18))}
+  .mission-text{font-size:19px;font-weight:700;letter-spacing:-.5px;line-height:1.32}
+  .mission-text.swap{animation:swapIn .35s ease}
+  .btn-row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .btn{
+    border:0;border-radius:16px;padding:13px 10px;font:inherit;font-size:14px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;
+    transition:transform .12s;letter-spacing:-.4px;line-height:1.2;
+  }
+  .btn:active{transform:scale(.97)}
+  .btn-primary{background:#DCF2DF;color:#4E8A5F;box-shadow:0 4px 10px rgba(120,180,140,.22)}
+  .btn-primary.done{background:#EEF6EF;color:#94AD98;box-shadow:none}
+  .btn-ghost{background:#FFFDF8;color:#7D6A57;box-shadow:0 4px 10px rgba(190,155,110,.15)}
+  .hint{margin:10px 2px 0;font-size:11.5px;color:var(--ink-mute);text-align:center}
+  .spark{position:absolute;font-size:16px;pointer-events:none;z-index:6;animation:sparkOut .95s ease-out forwards}
+
+  /* ---------- footer ---------- */
+  .foot{margin:18px 4px 0;text-align:center;font-size:11px;color:#BCAC97;line-height:1.6}
+
+  /* ---------- sheet ---------- */
+  .backdrop{
+    position:fixed;inset:0;z-index:60;display:none;align-items:flex-end;justify-content:center;
+    background:rgba(70,50,35,.38);
+    -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  }
+  .backdrop.open{display:flex}
+  .sheet{
+    width:100%;max-width:430px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    background:#FFFCF4;border-radius:26px 26px 0 0;
+    padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 22px);
+    box-shadow:0 -8px 30px rgba(80,50,20,.18);
+    animation:sheetUp .28s ease both;
+  }
+  .sheet-grab{width:40px;height:4px;border-radius:99px;background:#EFE2CF;margin:0 auto 12px}
+  .sheet-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+  .sheet-titles{flex:1 1 auto;min-width:0}
+  .sheet-titles h2{margin:0;font-size:18px;letter-spacing:-.5px}
+  .sheet-avatar{width:46px;height:46px;border-radius:14px;background:#FFFDF6;box-shadow:0 2px 8px rgba(190,160,120,.2);overflow:hidden;flex:0 0 auto}
+  .sheet-avatar svg{width:100%;height:100%;display:block}
+  .x-btn{margin-left:auto;width:34px;height:34px;border-radius:50%;border:0;background:#F6EEE2;color:#8A7561;font-size:15px;cursor:pointer;flex:0 0 auto}
+  .small-note{font-size:11.5px;color:var(--ink-mute);line-height:1.55;margin:4px 0}
+  .sec-title{font-size:12.5px;color:#B09677;font-weight:700;margin:16px 0 8px}
+  .star-hero{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    background:linear-gradient(140deg,#FFF7E6,#FFF1F4);border-radius:18px;padding:12px;margin:10px 0 4px;
+  }
+  .star-hero-icon{display:flex;align-items:center}
+  .star-hero-icon .star-ico{width:26px;height:26px}
+  .star-hero-num{font-size:26px;font-weight:700;color:var(--ink);letter-spacing:-1px}
+  .star-hero-num span{font-size:13px;color:var(--ink-mute);margin-left:2px;font-weight:400}
+  .star-hero-actions{margin-left:auto;display:flex;gap:6px}
+  .star-hero-actions .btn{padding:9px 11px;font-size:12.5px;border-radius:12px}
+  .goal-bar{height:10px;border-radius:99px;background:#F6EDE0;overflow:hidden;margin:8px 0 4px}
+  .goal-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#FFD08A,#FFA9B8);transition:width .4s}
+  .field{display:flex;flex-direction:column;gap:5px;margin-bottom:9px}
+  .field label{font-size:12px;color:var(--ink-mute)}
+  .input{
+    width:100%;border:1px solid var(--line);background:#FFFDF8;border-radius:12px;
+    padding:10px 12px;font:inherit;font-size:14px;color:var(--ink);min-width:0;
+  }
+  .input:focus{outline:none;border-color:#FFC7D5;box-shadow:0 0 0 3px rgba(255,199,213,.35)}
+  textarea.input{resize:vertical;font-size:11.5px;line-height:1.5;font-family:ui-monospace,Menlo,Consolas,monospace}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .row .input{flex:1 1 120px}
+  .log-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow:auto}
+  .log-row{display:flex;align-items:center;gap:8px;background:#FFFDF8;border:1px solid #F3E8D8;border-radius:12px;padding:8px 10px;font-size:12.5px}
+  .log-reason{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#7D6A57}
+  .log-when{color:#B3A28D;font-size:11px;white-space:nowrap}
+  .log-delta{font-weight:700;color:#E7A33C;min-width:26px;text-align:right}
+  .log-delta.down{color:#C8765B}
+  .switch{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:#FFFDF8;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:13px;
+  }
+  .switch input{appearance:none;-webkit-appearance:none;width:42px;height:24px;border-radius:99px;background:#E9DECF;position:relative;outline:none;cursor:pointer;flex:0 0 auto;transition:background .2s;margin:0}
+  .switch input::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
+  .switch input:checked{background:#9ED5A9}
+  .switch input:checked::after{transform:translateX(18px)}
+  .file-label{display:block;text-align:center;border:1px dashed #E7D8C2;border-radius:12px;padding:10px;font-size:12.5px;color:#8A7561;cursor:pointer;margin-top:8px}
+  .danger{background:#FFF1EE;color:#C8765B;box-shadow:0 4px 10px rgba(220,150,130,.16)}
+  .tight{padding:10px 14px;font-size:13px;flex:0 0 auto;border-radius:12px}
+  .sum-row{display:flex;align-items:center;gap:8px;background:#FFFDF8;border:1px solid #F3E8D8;border-radius:12px;padding:10px 12px;margin-bottom:6px;font-size:13.5px}
+  .sum-name{flex:1 1 auto;font-weight:700}
+  .sum-stars{color:#8A7561;font-size:12.5px;display:inline-flex;align-items:center;gap:3px}
+  .sum-stars .star-ico{width:13px;height:13px}
+  .sum-gain{color:#B3A28D;font-size:12px;min-width:34px;text-align:right}
+  .sum-gain.up{color:#E7A33C;font-weight:700}
+  .sum-line{background:#FFF7E9;border-radius:14px;padding:11px 13px;font-size:13px;color:#8A6F4E;line-height:1.55;margin-top:10px}
+
+  /* ---------- calendar ---------- */
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin:6px 0 10px}
+  .cal-nav{width:36px;height:36px;border-radius:12px;border:1px solid #EFE3D1;background:#FFFDF8;font:inherit;color:#8A7561;cursor:pointer}
+  .cal-title{font-size:15px;font-weight:700;color:#7D6A57}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .cal-dow{text-align:center;font-size:11px;color:#B3A28D;padding-bottom:2px}
+  .cal-dow.sun{color:#E2909F}
+  .cal-day{
+    position:relative;aspect-ratio:1/1;border-radius:12px;border:1px solid transparent;background:#FFFDF8;
+    font:inherit;font-size:13px;color:#6B5644;display:grid;place-items:center;cursor:pointer;padding:0;overflow:hidden;
+  }
+  .cal-day:disabled{color:#D8CEC0;background:transparent;cursor:default}
+  .cal-day.empty{background:transparent;cursor:default}
+  .cal-day.today{border-color:#FFC7D5;font-weight:700}
+  .cal-day.stamped{background:#FFF3F6;border-color:#FFDCE5}
+  .cal-day .stamp-dot{position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:#FF9DB4;z-index:2}
+  .cal-day .dnum{position:relative;z-index:2;font-weight:700;font-size:12px;color:#8A7561}
+  .cal-day:disabled .dnum{color:#D8CEC0}
+  .cal-note{text-align:center;margin-top:10px}
+
+  /* ---------- toast ---------- */
+  .toast{
+    position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);
+    transform:translate(-50%,14px);opacity:0;pointer-events:none;
+    background:rgba(72,54,40,.94);color:#FFF8EC;font-size:12.5px;padding:10px 16px;border-radius:999px;
+    z-index:90;max-width:86vw;text-align:center;line-height:1.4;
+    transition:opacity .22s,transform .22s;
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+
+  /* ---------- animations ---------- */
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+  @keyframes stampPop{0%{transform:scale(1.9) rotate(-20deg);opacity:0}55%{transform:scale(.92) rotate(-4deg);opacity:1}100%{transform:scale(1) rotate(-6deg);opacity:1}}
+  @keyframes floatUp{0%{transform:translateY(2px);opacity:0}20%{opacity:1}100%{transform:translateY(-40px);opacity:0}}
+  @keyframes sheetUp{from{transform:translateY(26px);opacity:.4}to{transform:translateY(0);opacity:1}}
+  @keyframes sparkOut{0%{opacity:0;transform:translateY(0) scale(.5)}30%{opacity:1}100%{opacity:0;transform:translateY(-72px) scale(1.25)}}
+  @keyframes swapIn{0%{opacity:0;transform:translateY(6px) rotate(-2deg)}100%{opacity:1;transform:none}}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+  }
+  @media (max-width:379px){
+    .title{font-size:19.5px}
+    .mission-text{font-size:17px}
+    .m-name{font-size:17.5px}
+    .m-sub{font-size:10.5px}
+    .star-badge{font-size:17px;min-width:40px}
+    .star-ico{width:17px;height:17px}
+    .mini{width:22px;height:22px;font-size:13px}
+    .avatar{width:52px;height:52px;border-radius:16px}
+    .piggy{font-size:11px;padding:4px 8px}
+    .count-text{font-size:11.5px;padding:6px 10px}
+    .cal-btn{font-size:11.5px;padding:7px 11px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ================= header ================= -->
+  <header>
+    <div class="top-row">
+      <div class="brand">
+        <div class="logo" id="logo"></div>
+        <h1 class="title"><span class="t1">우리 가족 </span><span class="t2">기록장</span></h1>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="btnSettings" aria-label="설정 열기">⚙️<span class="dot" aria-hidden="true"></span></button>
+        <button class="icon-btn" id="btnFull" aria-label="전체화면">↗</button>
+      </div>
+    </div>
+    <div class="date-row">
+      <div>
+        <p class="today" id="todayLabel">오늘</p>
+        <p class="subtitle">우리집의 포근한 하루</p>
+      </div>
+      <button class="chip" id="btnSummary">✨ 오늘도 함께 기록해요</button>
+    </div>
+  </header>
+
+  <!-- ================= weather ================= -->
+  <section class="weather" id="weatherCard" role="button" tabindex="0" aria-label="춘천 날씨, 눌러서 새로고침">
+    <div class="w-top">
+      <div class="w-icon" id="wIcon"></div>
+      <span class="w-city">춘천</span>
+      <span class="w-temp" id="wTemp">–°</span>
+      <span class="w-desc" id="wDesc">날씨 불러오는 중…</span>
+      <span class="w-range" id="wRange"></span>
+    </div>
+    <div class="w-bot">
+      <div class="w-badges">
+        <span class="badge" id="pm10Badge">미세먼지 –</span>
+        <span class="badge" id="pm25Badge">초미세먼지 –</span>
+      </div>
+      <button class="advice" id="wAdvice" type="button">🌿 오늘도 좋은 하루</button>
+    </div>
+    <div class="w-note" id="wNote"></div>
+  </section>
+
+  <div class="stack">
+
+    <!-- ================= family ================= -->
+    <section class="family" id="familyList" aria-label="우리 가족 별 기록"></section>
+
+    <!-- ================= stamp ================= -->
+    <section class="stamp-card" id="stampCard">
+      <div class="card-head">
+        <div class="head-title"><span class="head-emoji">🐭</span><span id="stampTitle">재이 도장판</span></div>
+        <span class="pill-badge hot" id="streakBadge">0일 연속</span>
+      </div>
+      <p class="guide" id="stampGuide">재이가 그날 공부나 루틴을 하나라도 마치면 귀여운 도장이 찍혀요</p>
+      <div class="slots" id="slots"></div>
+      <div class="stamp-foot">
+        <span class="count-text" id="stampCount">이번 달 도장 0개 · 오늘 아직</span>
+        <button class="cal-btn" id="btnCalendar">📅 도장판 달력 보기</button>
+      </div>
+    </section>
+
+    <!-- ================= mission ================= -->
+    <section class="mission" id="missionCard">
+      <div class="card-head">
+        <div class="head-title"><span class="head-emoji">🎲</span>오늘의 가족 미션</div>
+        <span class="pill-badge" id="missionCount">함께 0번</span>
+      </div>
+      <div class="mission-body">
+        <span class="mission-emoji" id="missionEmoji">🥕</span>
+        <span class="mission-text" id="missionText">미션을 준비하고 있어요</span>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btnMissionDone">✅ 다 같이 했어요</button>
+        <button class="btn btn-ghost" id="btnMissionNew">🔄 다른 미션 뽑기</button>
+      </div>
+      <p class="hint">가족이 다 함께 하는 미션이에요. 하루에 한 번 가볍게 해봐요!</p>
+    </section>
+  </div>
+
+  <p class="foot">작은 기록들이 모여 우리집 하루가 돼요 🌱<br>모든 기록은 이 기기에 자동으로 저장됩니다</p>
+</div>
+
+<!-- ================= sheet ================= -->
+<div class="backdrop" id="backdrop">
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="가족 기록장 상세">
+    <div class="sheet-grab"></div>
+    <div id="sheetBody"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<noscript><p style="padding:20px;text-align:center">자바스크립트를 켜야 기록장이 움직여요.</p></noscript>
+
+<script>
+(function(){
+'use strict';
+
+/* =========================================================
+   0. 상수 · 상태
+   ========================================================= */
+var KEY = 'family-record-v2';
+var WKEY = 'family-weather-v1';
+var DOW = ['일','월','화','수','목','금','토'];
+var WEEK_MON = [1,2,3,4,5,6,0];
+var DEF = {
+  jae:{alias:'재이', full:'치이카와'},
+  mom:{alias:'엄마', full:'우사기'},
+  dad:{alias:'아빠', full:'하치와레'}
+};
+var ORDER = ['jae','mom','dad'];
+
+var MISSIONS = [
+  {id:'m01', icon:'🥕', text:'저녁 준비 같이 돕기'},
+  {id:'m02', icon:'📚', text:'잠자기 전 책 10분 같이 읽기'},
+  {id:'m03', icon:'😄', text:'오늘 있었던 재밌는 일 하나씩 말하기'},
+  {id:'m04', icon:'🧹', text:'거실 5분 같이 정리하기'},
+  {id:'m05', icon:'🤗', text:'가족 서로 안아주기'},
+  {id:'m06', icon:'👕', text:'내일 입을 옷 같이 고르기'},
+  {id:'m07', icon:'🍽️', text:'다 같이 설거지하기'},
+  {id:'m08', icon:'🚶', text:'다 같이 10분 산책하기'},
+  {id:'m09', icon:'💌', text:'오늘 고마운 일 한 가지씩 말하기'},
+  {id:'m10', icon:'📸', text:'가족 사진 한 장 찍기'},
+  {id:'m11', icon:'🍪', text:'함께 간식 만들기'},
+  {id:'m12', icon:'✏️', text:'재이 숙제 같이 봐주기'},
+  {id:'m13', icon:'🪟', text:'창문 열고 3분 환기하기'},
+  {id:'m14', icon:'💧', text:'다 같이 물 한 잔 마시기'},
+  {id:'m15', icon:'⭐', text:'오늘의 칭찬 하나씩 해주기'},
+  {id:'m16', icon:'🎵', text:'좋아하는 노래 한 곡 같이 듣기'},
+  {id:'m17', icon:'🍳', text:'내일 아침 메뉴 정하기'},
+  {id:'m18', icon:'🧘', text:'다 같이 스트레칭 3분'},
+  {id:'m19', icon:'🪴', text:'화분에 물 주기'},
+  {id:'m20', icon:'🎲', text:'오늘의 가족 운세 하나씩 말하기'}
+];
+
+var TALK = [
+  '오늘도 서로에게 다정한 하루였으면 좋겠어요.',
+  '잘한 일은 크게, 실수는 가볍게 말해주세요.',
+  '가족이 함께 있으면 평범한 저녁도 특별해져요.',
+  '고마움은 바로 말할수록 더 오래 남아요.',
+  '오늘 하나만 같이 해도 충분해요.',
+  '작은 칭찬 한 마디가 하루를 바꿔요.',
+  '우리 가족 속도로 천천히 가도 괜찮아요.'
+];
+
+/* =========================================================
+   1. 캐릭터 (인라인 SVG)
+   ========================================================= */
+var AV = {};
+
+AV.jae = ''
++ '<svg viewBox="0 0 100 100" role="img" aria-label="재이 캐릭터">'
++ '<circle cx="50" cy="52" r="47" fill="#FFF6E6"/>'
++ '<path d="M20 44c-4-14 2-23 10-22 7 1 10 9 8 19" fill="#FFF4E4" stroke="#E7C9A7" stroke-width="2.4" stroke-linejoin="round"/>'
++ '<path d="M80 44c4-14-2-23-10-22-7 1-10 9-8 19" fill="#FFF4E4" stroke="#E7C9A7" stroke-width="2.4" stroke-linejoin="round"/>'
++ '<ellipse cx="50" cy="57" rx="31" ry="28" fill="#FFFCF4" stroke="#E7C9A7" stroke-width="2.4"/>'
++ '<ellipse cx="28" cy="64" rx="7" ry="4.6" fill="#FFAFC0" opacity="0.5"/>'
++ '<ellipse cx="72" cy="64" rx="7" ry="4.6" fill="#FFAFC0" opacity="0.5"/>'
++ '<path d="M34 53q4.5 6 9 0" fill="none" stroke="#6E5A48" stroke-width="2.6" stroke-linecap="round"/>'
++ '<path d="M57 53q4.5 6 9 0" fill="none" stroke="#6E5A48" stroke-width="2.6" stroke-linecap="round"/>'
++ '<ellipse cx="50" cy="64" rx="3.1" ry="2.5" fill="#E8889C"/>'
++ '<path d="M50 90C41 82 37 77.5 37 73.5c0-3.6 2.8-6 5.8-6 2.2 0 3.9 1.3 4.7 2.6.8-1.3 2.5-2.6 4.7-2.6 3 0 5.8 2.4 5.8 6 0 4-4 8.5-13 16.5z" fill="#FF7488" stroke="#E05A70" stroke-width="1.5" stroke-linejoin="round"/>'
++ '<path d="M50 70.5l-4.4-4.6 4.4 1.1 4.4-1.1z" fill="#86C98F"/>'
++ '<ellipse cx="37" cy="78" rx="6" ry="4.4" fill="#FFFCF4" stroke="#E7C9A7" stroke-width="2"/>'
++ '<ellipse cx="63" cy="78" rx="6" ry="4.4" fill="#FFFCF4" stroke="#E7C9A7" stroke-width="2"/>'
++ '</svg>';
+
+AV.mom = ''
++ '<svg viewBox="0 0 100 100" role="img" aria-label="엄마 캐릭터">'
++ '<circle cx="50" cy="52" r="47" fill="#FFF3E6"/>'
++ '<ellipse cx="37" cy="27" rx="7.5" ry="17" transform="rotate(-12 37 27)" fill="#FFFCF4" stroke="#E9CDAE" stroke-width="2.4"/>'
++ '<ellipse cx="37" cy="28" rx="3.4" ry="11" transform="rotate(-12 37 28)" fill="#FFD9E1"/>'
++ '<ellipse cx="63" cy="27" rx="7.5" ry="17" transform="rotate(12 63 27)" fill="#FFFCF4" stroke="#E9CDAE" stroke-width="2.4"/>'
++ '<ellipse cx="63" cy="28" rx="3.4" ry="11" transform="rotate(12 63 28)" fill="#FFD9E1"/>'
++ '<ellipse cx="50" cy="62" rx="28" ry="26" fill="#FFFCF4" stroke="#E9CDAE" stroke-width="2.4"/>'
++ '<ellipse cx="28" cy="69" rx="6.6" ry="4.3" fill="#FFAFC0" opacity="0.5"/>'
++ '<ellipse cx="72" cy="69" rx="6.6" ry="4.3" fill="#FFAFC0" opacity="0.5"/>'
++ '<path d="M34 59q4.5 6 9 0" fill="none" stroke="#6E5A48" stroke-width="2.6" stroke-linecap="round"/>'
++ '<path d="M57 59q4.5 6 9 0" fill="none" stroke="#6E5A48" stroke-width="2.6" stroke-linecap="round"/>'
++ '<path d="M48.6 66h2.8L50 68.2z" fill="#F29AAE"/>'
++ '<path d="M66 73l6.5 17-13 0z" fill="#FFA552" stroke="#E8873B" stroke-width="1.6" stroke-linejoin="round"/>'
++ '<path d="M66 73.6l-4.4-5.4 4.6 1.4 3.4-4.2 1.2 5.4z" fill="#8CCB8F"/>'
++ '<ellipse cx="57" cy="79" rx="5.6" ry="4.2" fill="#FFFCF4" stroke="#E9CDAE" stroke-width="2"/>'
++ '<ellipse cx="76" cy="80" rx="5.6" ry="4.2" fill="#FFFCF4" stroke="#E9CDAE" stroke-width="2"/>'
++ '<path d="M82 34c-2.6-3.6-8-1.8-8 2.6 0 3.4 5 6 8 8.4 3-2.4 8-5 8-8.4 0-4.4-5.4-6.2-8-2.6z" fill="#FFB3C6"/>'
++ '</svg>';
+
+AV.dad = ''
++ '<svg viewBox="0 0 100 100" role="img" aria-label="아빠 캐릭터">'
++ '<circle cx="50" cy="52" r="47" fill="#EDF4FB"/>'
++ '<path d="M26 41L29 20l16 12z" fill="#FFFCF4" stroke="#E3CFBB" stroke-width="2.4" stroke-linejoin="round"/>'
++ '<path d="M74 41L71 20 55 32z" fill="#FFFCF4" stroke="#E3CFBB" stroke-width="2.4" stroke-linejoin="round"/>'
++ '<ellipse cx="50" cy="58" rx="29" ry="26" fill="#FFFCF4" stroke="#E3CFBB" stroke-width="2.4"/>'
++ '<path d="M32 37c3-10 13-13 18-5 6-7 15-2 13 6-6-3-11-1-13 4-3-5-9-6-18-5z" fill="#A9CBE8" stroke="#8FB6D8" stroke-width="1.2"/>'
++ '<ellipse cx="27" cy="64" rx="6.4" ry="4.2" fill="#FFAFC0" opacity="0.5"/>'
++ '<ellipse cx="73" cy="64" rx="6.4" ry="4.2" fill="#FFAFC0" opacity="0.5"/>'
++ '<ellipse cx="40" cy="56" rx="2.7" ry="3.4" fill="#6E5A48"/>'
++ '<path d="M57 55q4 5.5 8 0" fill="none" stroke="#6E5A48" stroke-width="2.6" stroke-linecap="round"/>'
++ '<path d="M46 65q2 2.6 4 0 2 2.6 4 0" fill="none" stroke="#6E5A48" stroke-width="2.2" stroke-linecap="round"/>'
++ '<path d="M50 71l14 19H36z" fill="#FFFDF7" stroke="#D9CCBD" stroke-width="2" stroke-linejoin="round"/>'
++ '<rect x="44" y="82" width="12" height="9" rx="1" fill="#3F4E42"/>'
++ '<ellipse cx="35" cy="80" rx="5.4" ry="4" fill="#FFFCF4" stroke="#E3CFBB" stroke-width="2"/>'
++ '<ellipse cx="65" cy="80" rx="5.4" ry="4" fill="#FFFCF4" stroke="#E3CFBB" stroke-width="2"/>'
++ '</svg>';
+
+AV.stamp = ''
++ '<svg viewBox="0 0 100 100" aria-hidden="true">'
++ '<circle cx="50" cy="50" r="46" fill="#FFF6E9" stroke="#F4D9AE" stroke-width="3" stroke-dasharray="5 6"/>'
++ '<path d="M25 42c-3-11 2-17 8-16 5 1 7 7 6 14" fill="#FFEFD6" stroke="#E7C9A7" stroke-width="2"/>'
++ '<path d="M75 42c3-11-2-17-8-16-5 1-7 7-6 14" fill="#FFEFD6" stroke="#E7C9A7" stroke-width="2"/>'
++ '<ellipse cx="50" cy="56" rx="24" ry="22" fill="#FFFCF4" stroke="#E7C9A7" stroke-width="2.2"/>'
++ '<ellipse cx="34" cy="62" rx="5" ry="3.3" fill="#FFAFC0" opacity="0.55"/>'
++ '<ellipse cx="66" cy="62" rx="5" ry="3.3" fill="#FFAFC0" opacity="0.55"/>'
++ '<path d="M38 52q3.6 5 7.2 0" fill="none" stroke="#6E5A48" stroke-width="2.2" stroke-linecap="round"/>'
++ '<path d="M55 52q3.6 5 7.2 0" fill="none" stroke="#6E5A48" stroke-width="2.2" stroke-linecap="round"/>'
++ '<ellipse cx="50" cy="62" rx="2.6" ry="2.1" fill="#E8889C"/>'
++ '</svg>';
+
+var STAR = '<svg class="star-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.4l2.9 6.1 6.7.9-4.9 4.6 1.2 6.6L12 17.4 6.1 20.6l1.2-6.6L2.4 9.4l6.7-.9z" fill="#FFC64B" stroke="#F0AE39" stroke-width="1.1" stroke-linejoin="round"/></svg>';
+var FLAME = '<svg class="flame-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.4c1.9 4 4.9 6.1 4.9 9.7a4.9 4.9 0 11-9.8 0c0-2 .8-3.4 1.8-4.8.3 1.4.9 2.2 1.7 2.5-.3-2.4-.1-4.9 1.4-7.4z" fill="#FF9B54" stroke="#F0803A" stroke-width=".8"/><path d="M12 21a3.2 3.2 0 01-3.2-3.2c0-1.8 1.3-2.8 2.2-4 .4.8.9 1.2 1.5 1.5.9.4 1.5 1.1 1.5 2.1A3.6 3.6 0 0112 21z" fill="#FFD79B"/></svg>';
+
+var LOGO = ''
++ '<svg viewBox="0 0 100 100" aria-hidden="true">'
++ '<path d="M22 33c-2-9 2-14 7-13 4 1 5 6 4 12" fill="#FFEFD6" stroke="#E5C8A8" stroke-width="2.6" stroke-linejoin="round"/>'
++ '<path d="M78 33c2-9-2-14-7-13-4 1-5 6-4 12" fill="#FFEFD6" stroke="#E5C8A8" stroke-width="2.6" stroke-linejoin="round"/>'
++ '<ellipse cx="50" cy="55" rx="40" ry="36" fill="#FFFCF4" stroke="#E5C8A8" stroke-width="3"/>'
++ '<circle cx="38" cy="51" r="3.4" fill="#6E5A48"/>'
++ '<circle cx="62" cy="51" r="3.4" fill="#6E5A48"/>'
++ '<ellipse cx="27" cy="61" rx="6" ry="4" fill="#FFAFC0" opacity="0.6"/>'
++ '<ellipse cx="73" cy="61" rx="6" ry="4" fill="#FFAFC0" opacity="0.6"/>'
++ '<path d="M45 60q5 5.5 10 0" fill="none" stroke="#6E5A48" stroke-width="2.6" stroke-linecap="round"/>'
++ '</svg>';
+
+/* =========================================================
+   2. 유틸
+   ========================================================= */
+function $(sel, root){ return (root || document).querySelector(sel); }
+function $all(sel, root){ return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+function pad2(n){ return (n < 10 ? '0' : '') + n; }
+function ymd(d){ return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+function parseYmd(s){ var p = String(s).split('-'); return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2])); }
+function todayYmd(){ return ymd(new Date()); }
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+function buzz(ms){
+  try{ if(navigator.vibrate){ navigator.vibrate(ms); } }catch(e){}
+}
+var toastTimer = null;
+function toast(msg){
+  var el = $('#toast');
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 2100);
+}
+
+/* =========================================================
+   3. 상태 저장
+   ========================================================= */
+function defaultState(){
+  var s = {
+    v: 2,
+    members: {},
+    stamps: {},
+    mission: { count: 0, done: {} },
+    todayMission: {},
+    customMissions: [],
+    settings: { autoStar: true },
+    savedAt: 0
+  };
+  ORDER.forEach(function(id){
+    s.members[id] = {
+      alias: DEF[id].alias,
+      full: DEF[id].full,
+      stars: 0,
+      goalText: '',
+      goalStars: 20,
+      log: []
+    };
+  });
+  return s;
+}
+
+function sanitizeLog(arr){
+  var out = [];
+  if(!Array.isArray(arr)) return out;
+  arr.forEach(function(e){
+    if(!e || typeof e !== 'object') return;
+    var t = Number(e.t);
+    var d = Number(e.d);
+    if(!isFinite(t) || !isFinite(d) || d === 0) return;
+    out.push({ t: t, d: Math.round(d), r: typeof e.r === 'string' ? e.r.slice(0, 40) : '' });
+  });
+  return out.slice(-80);
+}
+
+function mergeState(raw){
+  var base = defaultState();
+  if(!raw || typeof raw !== 'object') return base;
+
+  if(raw.members && typeof raw.members === 'object'){
+    ORDER.forEach(function(id){
+      var m = raw.members[id];
+      if(!m || typeof m !== 'object') return;
+      var t = base.members[id];
+      if(typeof m.alias === 'string' && m.alias.trim()) t.alias = m.alias.trim().slice(0, 12);
+      if(typeof m.full === 'string' && m.full.trim()) t.full = m.full.trim().slice(0, 16);
+      if(isFinite(Number(m.stars))) t.stars = Math.max(0, Math.round(Number(m.stars)) || 0);
+      if(typeof m.goalText === 'string') t.goalText = m.goalText.slice(0, 40);
+      if(isFinite(Number(m.goalStars)) && Number(m.goalStars) > 0) t.goalStars = Math.min(999, Math.round(Number(m.goalStars)));
+      t.log = sanitizeLog(m.log);
+    });
+  }
+  if(raw.stamps && typeof raw.stamps === 'object'){
+    Object.keys(raw.stamps).forEach(function(k){
+      if(/^\d{4}-\d{2}-\d{2}$/.test(k) && raw.stamps[k]) base.stamps[k] = true;
+    });
+  }
+  if(raw.mission && typeof raw.mission === 'object'){
+    if(isFinite(Number(raw.mission.count))) base.mission.count = Math.max(0, Math.round(Number(raw.mission.count)) || 0);
+    if(raw.mission.done && typeof raw.mission.done === 'object'){
+      Object.keys(raw.mission.done).forEach(function(k){
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(k)) return;
+        var v = raw.mission.done[k];
+        if(!v) return;
+        if(typeof v === 'object') base.mission.done[k] = { id: String(v.id || ''), t: Number(v.t) || 0 };
+        else base.mission.done[k] = { id: '', t: 0 };
+      });
+    }
+  }
+  if(raw.todayMission && typeof raw.todayMission === 'object'){
+    Object.keys(raw.todayMission).forEach(function(k){
+      if(/^\d{4}-\d{2}-\d{2}$/.test(k) && typeof raw.todayMission[k] === 'string'){
+        base.todayMission[k] = raw.todayMission[k];
+      }
+    });
+  }
+  if(Array.isArray(raw.customMissions)){
+    raw.customMissions.forEach(function(c){
+      if(!c || typeof c !== 'object') return;
+      var text = typeof c.text === 'string' ? c.text.trim().slice(0, 30) : '';
+      if(!text) return;
+      base.customMissions.push({
+        id: typeof c.id === 'string' && c.id ? c.id : 'c' + Date.now() + Math.floor(Math.random() * 999),
+        icon: typeof c.icon === 'string' && c.icon ? c.icon.slice(0, 4) : '🌱',
+        text: text
+      });
+    });
+  }
+  if(raw.settings && typeof raw.settings === 'object'){
+    base.settings.autoStar = raw.settings.autoStar !== false;
+  }
+  base.savedAt = isFinite(Number(raw.savedAt)) ? Number(raw.savedAt) : Date.now();
+  return base;
+}
+
+var storageOK = true;
+function loadState(){
+  try{
+    var raw = localStorage.getItem(KEY);
+    if(!raw) return defaultState();
+    return mergeState(JSON.parse(raw));
+  }catch(e){
+    storageOK = false;
+    return defaultState();
+  }
+}
+var state = loadState();
+
+function save(){
+  state.savedAt = Date.now();
+  try{ localStorage.setItem(KEY, JSON.stringify(state)); }
+  catch(e){ storageOK = false; }
+}
+
+/* =========================================================
+   4. 별 · 돼지저금통
+   ========================================================= */
+function addStars(id, delta, reason, silent){
+  var m = state.members[id];
+  if(!m) return 0;
+  var before = m.stars;
+  m.stars = Math.max(0, m.stars + delta);
+  var real = m.stars - before;
+  if(real !== 0){
+    m.log.push({ t: Date.now(), d: real, r: reason || '' });
+    if(m.log.length > 80) m.log = m.log.slice(-80);
+  }
+  save();
+  renderMembers();
+  if(real !== 0){
+    floatStar(id, (real > 0 ? '+' : '') + real);
+    if(!silent) toast(m.alias + ' 별 ' + (real > 0 ? '+' : '') + real + ' ⭐');
+    buzz(real > 0 ? 10 : 6);
+  }else if(!silent){
+    toast(m.alias + ' 별이 아직 없어요');
+  }
+  return real;
+}
+
+function useStar(id){
+  var m = state.members[id];
+  if(!m) return;
+  if(m.stars <= 0){ toast(m.alias + ' 별이 아직 없어요. 먼저 모아볼까요? ⭐'); return; }
+  addStars(id, -1, '별 사용');
+}
+
+function floatStar(id, text){
+  var card = document.querySelector('[data-member="' + id + '"]');
+  if(!card) return;
+  var el = document.createElement('span');
+  el.className = 'float';
+  el.textContent = text;
+  card.appendChild(el);
+  setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 1000);
+}
+
+/* =========================================================
+   5. 가족 카드
+   ========================================================= */
+function buildFamily(){
+  var host = $('#familyList');
+  if(!host) return;
+  var html = '';
+  ORDER.forEach(function(id){
+    html += ''
+      + '<div class="member" data-member="' + id + '" role="button" tabindex="0" aria-label="' + esc(DEF[id].alias) + ' 별 기록 열기">'
+      +   '<div class="avatar">' + AV[id] + '</div>'
+      +   '<div class="m-info">'
+      +     '<div class="m-name" data-name="' + id + '"></div>'
+      +     '<div class="m-sub" data-sub="' + id + '"></div>'
+      +   '</div>'
+      +   '<div class="m-right">'
+      +     '<div class="star-row">'
+      +       '<button class="mini" data-act="minus" data-id="' + id + '" aria-label="별 하나 사용">−</button>'
+      +       '<div class="star-badge">' + STAR + '<span class="num" data-num="' + id + '">0</span></div>'
+      +       '<button class="mini" data-act="plus" data-id="' + id + '" aria-label="별 하나 적립">+</button>'
+      +     '</div>'
+      +     '<button class="piggy" data-act="piggy" data-id="' + id + '">돼지저금통 🐷</button>'
+      +   '</div>'
+      + '</div>';
+  });
+  host.innerHTML = html;
+}
+
+function renderMembers(){
+  ORDER.forEach(function(id){
+    var m = state.members[id];
+    var nameEl = document.querySelector('[data-name="' + id + '"]');
+    var subEl = document.querySelector('[data-sub="' + id + '"]');
+    var numEl = document.querySelector('[data-num="' + id + '"]');
+    if(nameEl) nameEl.textContent = m.alias;
+    if(subEl) subEl.textContent = m.full + '와 함께';
+    if(numEl) numEl.textContent = String(m.stars);
+  });
+}
+
+/* =========================================================
+   6. 도장판
+   ========================================================= */
+var justStamped = null;
+
+function weekDates(){
+  var now = new Date();
+  var base = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  var wd = base.getDay();
+  var diff = (wd === 0 ? -6 : 1 - wd);
+  base.setDate(base.getDate() + diff);
+  var out = [];
+  for(var i = 0; i < 7; i++){
+    var d = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i);
+    out.push(d);
+  }
+  return out;
+}
+
+function calcStreak(){
+  var n = 0;
+  var d = new Date();
+  if(!state.stamps[ymd(d)]) d.setDate(d.getDate() - 1);
+  var guard = 0;
+  while(state.stamps[ymd(d)] && guard < 500){
+    n++;
+    guard++;
+    d.setDate(d.getDate() - 1);
+  }
+  return n;
+}
+
+function stampCountThisMonth(){
+  var prefix = todayYmd().slice(0, 7);
+  var n = 0;
+  Object.keys(state.stamps).forEach(function(k){
+    if(k.indexOf(prefix) === 0) n++;
+  });
+  return n;
+}
+
+function toggleStamp(dateKey){
+  var t = todayYmd();
+  if(dateKey > t){ toast('아직 오지 않은 날이에요 🌱'); return; }
+  if(state.stamps[dateKey]){
+    delete state.stamps[dateKey];
+    if(state.settings.autoStar) addStars('jae', -1, '도장 취소', true);
+    justStamped = null;
+    save();
+    renderStamps();
+    toast('도장을 지웠어요');
+    return;
+  }
+  state.stamps[dateKey] = true;
+  if(state.settings.autoStar) addStars('jae', 1, '도장 적립', true);
+  justStamped = dateKey;
+  save();
+  renderStamps();
+  buzz(14);
+  toast('도장 쾅! ' + (state.settings.autoStar ? '⭐+1' : '🐭'));
+}
+
+function renderStamps(){
+  var jae = state.members.jae;
+  $('#stampTitle').textContent = jae.alias + ' 도장판';
+  $('#stampGuide').textContent = jae.alias + '가 그날 공부나 루틴을 하나라도 마치면 귀여운 도장이 찍혀요';
+  $('#streakBadge').innerHTML = FLAME + ' ' + calcStreak() + '일 연속';
+
+  var host = $('#slots');
+  var t = todayYmd();
+  var days = weekDates();
+  var html = '';
+  for(var i = 0; i < 7; i++){
+    var d = days[i];
+    var key = ymd(d);
+    var wdIdx = d.getDay();
+    var isToday = key === t;
+    var isFuture = key > t;
+    var stamped = !!state.stamps[key];
+    var cls = 'slot';
+    if(isFuture) cls += ' future';
+    if(isToday) cls += ' today';
+    if(stamped) cls += ' stamped';
+    if(justStamped === key) cls += ' pop';
+    html += ''
+      + '<div class="slot-col">'
+      +   '<span class="wd' + (wdIdx === 0 ? ' sun' : '') + '">' + DOW[wdIdx] + '</span>'
+      +   '<button class="' + cls + '" data-stamp="' + key + '" aria-label="' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일 도장 ' + (stamped ? '지우기' : '찍기') + '">'
+      +     (stamped ? AV.stamp : '')
+      +   '</button>'
+      + '</div>';
+  }
+  host.innerHTML = html;
+  justStamped = null;
+
+  var month = stampCountThisMonth();
+  var doneToday = !!state.stamps[t];
+  $('#stampCount').textContent = '이번 달 도장 ' + month + '개 · 오늘 ' + (doneToday ? '찍음' : '아직');
+}
+
+/* =========================================================
+   7. 가족 미션
+   ========================================================= */
+function allMissions(){
+  var list = MISSIONS.slice();
+  state.customMissions.forEach(function(c){
+    list.push({ id: c.id, icon: c.icon || '🌱', text: c.text });
+  });
+  return list;
+}
+
+function findMission(id){
+  var all = allMissions();
+  for(var i = 0; i < all.length; i++){ if(all[i].id === id) return all[i]; }
+  return null;
+}
+
+function pickDaily(){
+  var d = new Date();
+  var seed = d.getFullYear() * 372 + (d.getMonth() + 1) * 31 + d.getDate();
+  var all = allMissions();
+  if(!all.length) return null;
+  return all[seed % all.length].id;
+}
+
+function currentMission(){
+  var t = todayYmd();
+  var done = state.mission.done[t];
+  if(done && done.id){
+    var dm = findMission(done.id);
+    if(dm) return dm;
+  }
+  var id = state.todayMission[t];
+  var m = id ? findMission(id) : null;
+  if(!m){
+    id = pickDaily();
+    state.todayMission[t] = id;
+    save();
+    m = findMission(id);
+  }
+  return m || { id: '', icon: '🌱', text: '오늘도 가볍게 한 가지 해봐요' };
+}
+
+function renderMission(spin){
+  var m = currentMission();
+  var t = todayYmd();
+  var done = !!state.mission.done[t];
+  $('#missionEmoji').textContent = m.icon;
+  var textEl = $('#missionText');
+  textEl.textContent = m.text;
+  if(spin){
+    textEl.classList.remove('swap');
+    void textEl.offsetWidth;
+    textEl.classList.add('swap');
+  }
+  $('#missionCount').textContent = '함께 ' + state.mission.count + '번';
+  var btn = $('#btnMissionDone');
+  if(done){
+    btn.classList.add('done');
+    btn.innerHTML = '<span aria-hidden="true">✅</span> 오늘 완료!';
+  }else{
+    btn.classList.remove('done');
+    btn.innerHTML = '<span aria-hidden="true">✅</span> 다 같이 했어요';
+  }
+}
+
+function completeMission(){
+  var t = todayYmd();
+  if(state.mission.done[t]){ toast('오늘 미션은 이미 함께 했어요! 내일 또 만나요 🐣'); return; }
+  var m = currentMission();
+  state.mission.done[t] = { id: m.id, t: Date.now() };
+  state.mission.count = (state.mission.count || 0) + 1;
+  ORDER.forEach(function(id){ addStars(id, 1, '가족 미션', true); });
+  save();
+  renderMission(false);
+  celebrate();
+  buzz([12, 40, 18]);
+  toast('다 같이 했어요! 우리 가족 모두 ⭐+1 🎉');
+}
+
+function drawMission(){
+  var t = todayYmd();
+  if(state.mission.done[t]){ toast('오늘은 이미 함께 했어요! 내일 새 미션이 와요 🌙'); return; }
+  var all = allMissions();
+  if(all.length < 2){ toast('미션이 하나뿐이에요. 설정에서 더 추가해 보세요'); return; }
+  var cur = state.todayMission[t];
+  var pool = all.filter(function(x){ return x.id !== cur; });
+  var pick = pool[Math.floor(Math.random() * pool.length)];
+  state.todayMission[t] = pick.id;
+  save();
+  renderMission(true);
+  buzz(8);
+  toast('새 미션을 뽑았어요 🎲');
+}
+
+function celebrate(){
+  var host = $('#missionCard');
+  if(!host) return;
+  var glyphs = ['⭐','✨','💫','🌟','💛'];
+  for(var i = 0; i < 10; i++){
+    var s = document.createElement('span');
+    s.className = 'spark';
+    s.textContent = glyphs[i % glyphs.length];
+    s.style.left = (12 + Math.random() * 76) + '%';
+    s.style.bottom = '38%';
+    s.style.animationDelay = (Math.random() * 0.18) + 's';
+    host.appendChild(s);
+    (function(el){ setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 1300); })(s);
+  }
+}
+
+/* =========================================================
+   8. 시트(모달)
+   ========================================================= */
+var sheetBody = $('#sheetBody');
+var backdrop = $('#backdrop');
+var sheetEl = $('#sheet');
+
+function openSheet(html){
+  sheetBody.innerHTML = html;
+  backdrop.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  sheetEl.scrollTop = 0;
+}
+function refreshSheet(fn){
+  var top = sheetEl.scrollTop;
+  fn();
+  sheetEl.scrollTop = top;
+}
+function closeSheet(){
+  backdrop.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function todayGain(id){
+  var t = todayYmd();
+  return state.members[id].log.reduce(function(sum, e){
+    return ymd(new Date(e.t)) === t ? sum + e.d : sum;
+  }, 0);
+}
+
+function openMemberSheet(id){
+  var m = state.members[id];
+  if(!m) return;
+  var goal = Math.max(1, m.goalStars || 20);
+  var pct = clamp(Math.round(m.stars / goal * 100), 0, 100);
+  var log = m.log.slice(-24).reverse();
+  var rows = '';
+  if(!log.length){
+    rows = '<p class="small-note">아직 별 기록이 없어요. + 버튼으로 별을 모아보세요 ⭐</p>';
+  }else{
+    log.forEach(function(e){
+      var d = new Date(e.t);
+      var when = ymd(d) === todayYmd()
+        ? '오늘 ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes())
+        : (d.getMonth() + 1) + '월 ' + d.getDate() + '일';
+      rows += '<div class="log-row">'
+        + '<span class="log-reason">' + esc(e.r || '별 기록') + '</span>'
+        + '<span class="log-when">' + when + '</span>'
+        + '<span class="log-delta' + (e.d > 0 ? '' : ' down') + '">' + (e.d > 0 ? '+' : '') + e.d + '</span>'
+        + '</div>';
+    });
+  }
+  var goalLine = m.goalText ? esc(m.goalText) : '아직 정한 보상이 없어요';
+  var html = ''
+    + '<div class="sheet-head">'
+    +   '<div class="sheet-avatar">' + AV[id] + '</div>'
+    +   '<div class="sheet-titles"><h2>' + esc(m.alias) + ' 돼지저금통</h2>'
+    +     '<p class="small-note">모은 별은 목표 보상으로 바꿀 수 있어요</p></div>'
+    +   '<button class="x-btn" data-act="close" aria-label="닫기">✕</button>'
+    + '</div>'
+    + '<div class="star-hero">'
+    +   '<span class="star-hero-icon" aria-hidden="true">' + STAR + '</span>'
+    +   '<span class="star-hero-num" id="heroNum">' + m.stars + '<span>개</span></span>'
+    +   '<div class="star-hero-actions">'
+    +     '<button class="btn btn-ghost" data-act="use" data-id="' + id + '">− 사용</button>'
+    +     '<button class="btn btn-primary" data-act="earn" data-id="' + id + '">+ 적립</button>'
+    +   '</div>'
+    + '</div>'
+    + '<div class="sec-title">목표 보상</div>'
+    + '<div class="goal-bar"><div class="goal-fill" style="width:' + pct + '%"></div></div>'
+    + '<p class="small-note">⭐ ' + m.stars + ' / ' + goal + ' · ' + goalLine + '</p>'
+    + '<div class="row" style="margin-top:6px">'
+    +   '<input class="input" id="goalText" maxlength="40" placeholder="예: 자전거 타기" value="' + esc(m.goalText) + '" aria-label="목표 보상 이름">'
+    +   '<input class="input" id="goalStars" type="number" min="1" max="999" step="1" value="' + goal + '" style="flex:0 0 84px" aria-label="목표 별 개수">'
+    + '</div>'
+    + '<div class="row" style="margin-top:8px">'
+    +   '<button class="btn btn-ghost" data-act="saveGoal" data-id="' + id + '" style="flex:1 1 auto">목표 저장</button>'
+    + '</div>'
+    + '<div class="sec-title">별 히스토리 <span class="small-note">(최근 24개)</span></div>'
+    + '<div class="log-list">' + rows + '</div>';
+  openSheet(html);
+}
+
+function openCalendar(){
+  var y = viewMonth.getFullYear();
+  var mo = viewMonth.getMonth();
+  var first = new Date(y, mo, 1);
+  var startPad = (first.getDay() + 6) % 7;
+  var daysInMonth = new Date(y, mo + 1, 0).getDate();
+  var t = todayYmd();
+  var dows = '';
+  for(var i = 0; i < 7; i++){
+    var wd = WEEK_MON[i];
+    dows += '<div class="cal-dow' + (wd === 0 ? ' sun' : '') + '">' + DOW[wd] + '</div>';
+  }
+  var cells = '';
+  for(var p = 0; p < startPad; p++) cells += '<span class="cal-day empty"></span>';
+  for(var d = 1; d <= daysInMonth; d++){
+    var key = y + '-' + pad2(mo + 1) + '-' + pad2(d);
+    var cls = 'cal-day';
+    if(key === t) cls += ' today';
+    if(state.stamps[key]) cls += ' stamped';
+    var future = key > t;
+    cells += '<button class="' + cls + '" data-cal="' + key + '"' + (future ? ' disabled' : '')
+      + ' aria-label="' + (mo + 1) + '월 ' + d + '일' + (state.stamps[key] ? ' 도장 있음' : '') + '">'
+      + (state.stamps[key] ? '<span class="stamp-dot" aria-hidden="true"></span>' : '')
+      + '<span class="dnum">' + d + '</span>'
+      + '</button>';
+  }
+  var prefix = y + '-' + pad2(mo + 1);
+  var count = 0;
+  Object.keys(state.stamps).forEach(function(k){ if(k.indexOf(prefix) === 0) count++; });
+  var html = ''
+    + '<div class="sheet-head">'
+    +   '<div class="sheet-titles"><h2>' + y + '년 ' + (mo + 1) + '월 도장판</h2>'
+    +     '<p class="small-note">이번 달 도장 ' + count + '개 · 날짜를 누르면 찍거나 지울 수 있어요</p></div>'
+    +   '<button class="x-btn" data-act="close" aria-label="닫기">✕</button>'
+    + '</div>'
+    + '<div class="cal-head">'
+    +   '<button class="cal-nav" data-act="prevMonth" aria-label="이전 달">◀</button>'
+    +   '<span class="cal-title">' + y + '. ' + pad2(mo + 1) + '</span>'
+    +   '<button class="cal-nav" data-act="nextMonth" aria-label="다음 달">▶</button>'
+    + '</div>'
+    + '<div class="cal-grid">' + dows + cells + '</div>'
+    + '<p class="small-note cal-note">오늘 이후 날짜는 아직 찍을 수 없어요 🌱</p>';
+  openSheet(html);
+}
+
+function renderCustomList(){
+  var host = $('#customList');
+  if(!host) return;
+  if(!state.customMissions.length){
+    host.innerHTML = '<p class="small-note">아직 추가한 미션이 없어요.</p>';
+    return;
+  }
+  var html = '';
+  state.customMissions.forEach(function(c){
+    html += '<div class="log-row">'
+      + '<span aria-hidden="true">' + esc(c.icon) + '</span>'
+      + '<span class="log-reason">' + esc(c.text) + '</span>'
+      + '<button class="mini" data-act="delMission" data-cid="' + esc(c.id) + '" aria-label="삭제">✕</button>'
+      + '</div>';
+  });
+  host.innerHTML = html;
+}
+
+function openSettings(){
+  var html = ''
+    + '<div class="sheet-head">'
+    +   '<div class="sheet-titles"><h2>설정</h2><p class="small-note">모든 기록은 이 기기 브라우저에 자동 저장돼요.</p></div>'
+    +   '<button class="x-btn" data-act="close" aria-label="닫기">✕</button>'
+    + '</div>'
+    + '<div class="sec-title">가족 이름 · 별명</div>';
+  ORDER.forEach(function(id){
+    html += '<div class="field"><label for="alias-' + id + '">' + esc(DEF[id].alias) + '</label>'
+      + '<div class="row">'
+      +   '<input class="input" id="alias-' + id + '" maxlength="12" value="' + esc(state.members[id].alias) + '" aria-label="' + esc(DEF[id].alias) + ' 별명" style="flex:1 1 90px">'
+      +   '<input class="input" id="full-' + id + '" maxlength="16" value="' + esc(state.members[id].full) + '" aria-label="' + esc(DEF[id].alias) + ' 이름" style="flex:1 1 110px">'
+      + '</div></div>';
+  });
+  html += ''
+    + '<div class="sec-title">도장 설정</div>'
+    + '<label class="switch"><span>도장을 찍으면 ' + esc(state.members.jae.alias) + ' 별 ⭐1 자동 적립</span>'
+    +   '<input type="checkbox" id="autoStar"' + (state.settings.autoStar ? ' checked' : '') + '></label>'
+    + '<div class="sec-title">나만의 가족 미션</div>'
+    + '<div class="row">'
+    +   '<input class="input" id="newMission" maxlength="30" placeholder="예: 다 같이 화분에 물 주기" aria-label="새 미션">'
+    +   '<button class="btn btn-primary tight" data-act="addMission">추가</button>'
+    + '</div>'
+    + '<div class="log-list" id="customList" style="margin-top:8px"></div>'
+    + '<div class="sec-title">데이터 백업 · 복원</div>'
+    + '<p class="small-note">JSON을 다른 가족 폰에 붙여넣으면 기록을 함께 볼 수 있어요.</p>'
+    + '<div class="row" style="margin-top:8px">'
+    +   '<button class="btn btn-ghost tight" data-act="export">JSON 내보내기</button>'
+    +   '<button class="btn btn-ghost tight" data-act="copy">복사</button>'
+    + '</div>'
+    + '<textarea class="input" id="backupText" rows="3" placeholder="백업한 JSON을 여기에 붙여넣고 복원을 누르세요" style="margin-top:8px" aria-label="백업 JSON"></textarea>'
+    + '<div class="row" style="margin-top:8px">'
+    +   '<button class="btn btn-ghost tight" data-act="restoreText" style="flex:1 1 auto">붙여넣은 내용 복원</button>'
+    + '</div>'
+    + '<label class="file-label">파일에서 복원<input type="file" id="fileRestore" accept="application/json,.json" hidden></label>'
+    + '<div class="sec-title">초기화</div>'
+    + '<button class="btn btn-ghost danger" data-act="resetAll" style="width:100%">모든 기록 지우기</button>'
+    + '<p class="small-note" id="resetNote">지운 기록은 되돌릴 수 없어요.</p>'
+    + (storageOK ? '' : '<p class="small-note">이 브라우저에서는 자동 저장이 막혀 있어요. 백업 JSON을 꼭 남겨주세요.</p>');
+  openSheet(html);
+  renderCustomList();
+  bindSettings();
+}
+
+function bindSettings(){
+  ORDER.forEach(function(id){
+    var a = $('#alias-' + id);
+    var f = $('#full-' + id);
+    if(a){
+      a.addEventListener('change', function(){
+        var v = (a.value || '').trim().slice(0, 12);
+        state.members[id].alias = v || DEF[id].alias;
+        a.value = state.members[id].alias;
+        save();
+        renderMembers();
+        renderStamps();
+        renderMission(false);
+      });
+    }
+    if(f){
+      f.addEventListener('change', function(){
+        var v = (f.value || '').trim().slice(0, 16);
+        state.members[id].full = v || DEF[id].full;
+        f.value = state.members[id].full;
+        save();
+        renderMembers();
+      });
+    }
+  });
+  var sw = $('#autoStar');
+  if(sw){
+    sw.addEventListener('change', function(){
+      state.settings.autoStar = !!sw.checked;
+      save();
+      toast(sw.checked ? '도장 찍으면 별 ⭐1 자동 적립!' : '도장과 별을 따로 모을게요');
+    });
+  }
+  var file = $('#fileRestore');
+  if(file){
+    file.addEventListener('change', function(){
+      if(!file.files || !file.files[0]) return;
+      var reader = new FileReader();
+      reader.onload = function(){
+        try{
+          applyRestore(String(reader.result));
+        }catch(e){
+          toast('파일을 읽지 못했어요');
+        }
+      };
+      reader.readAsText(file.files[0]);
+    });
+  }
+}
+
+function applyRestore(text){
+  var raw;
+  try{ raw = JSON.parse(text); }
+  catch(e){ toast('JSON 형식이 아니에요. 다시 확인해 주세요'); return false; }
+  if(!raw || typeof raw !== 'object' || !raw.members){ toast('우리 가족 기록장 백업 파일이 아니에요'); return false; }
+  var restored = mergeState(raw);
+  state = restored;
+  save();
+  renderMembers();
+  renderStamps();
+  renderMission(false);
+  closeSheet();
+  toast('기록을 복원했어요 ✅');
+  return true;
+}
+
+function summaryLine(){
+  var t = todayYmd();
+  var d = parseYmd(t);
+  var idx = (d.getDate() + d.getMonth()) % TALK.length;
+  return TALK[idx];
+}
+
+function openSummary(){
+  var t = todayYmd();
+  var d = parseYmd(t);
+  var rows = '';
+  ORDER.forEach(function(id){
+    var m = state.members[id];
+    var gain = todayGain(id);
+    rows += '<div class="sum-row">'
+      + '<span class="sum-name">' + esc(m.alias) + '</span>'
+      + '<span class="sum-stars">' + STAR + ' ' + m.stars + '개</span>'
+      + '<span class="sum-gain' + (gain > 0 ? ' up' : '') + '">' + (gain > 0 ? '+' + gain : '0') + '</span>'
+      + '</div>';
+  });
+  var done = !!state.mission.done[t];
+  var mi = currentMission();
+  var html = ''
+    + '<div class="sheet-head">'
+    +   '<div class="sheet-titles"><h2>' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일 ' + DOW[d.getDay()] + '요일 기록</h2>'
+    +     '<p class="small-note">우리집의 포근한 하루 요약</p></div>'
+    +   '<button class="x-btn" data-act="close" aria-label="닫기">✕</button>'
+    + '</div>'
+    + '<div class="sec-title">오늘 모은 별</div>'
+    + rows
+    + '<div class="sec-title">오늘의 체크</div>'
+    + '<div class="sum-row"><span class="sum-name">🐭 ' + esc(state.members.jae.alias) + ' 도장</span>'
+    +   '<span class="sum-gain' + (state.stamps[t] ? ' up' : '') + '">' + (state.stamps[t] ? '찍음 ✅' : '아직') + '</span></div>'
+    + '<div class="sum-row"><span class="sum-name">🎲 가족 미션</span>'
+    +   '<span class="sum-gain' + (done ? ' up' : '') + '">' + (done ? '함께 함 ✅' : '아직') + '</span></div>'
+    + '<p class="small-note">오늘 미션: ' + esc(mi.icon + ' ' + mi.text) + '</p>'
+    + '<p class="small-note">이번 달 도장 ' + stampCountThisMonth() + '개 · 🔥 ' + calcStreak() + '일 연속 · 함께 ' + state.mission.count + '번</p>'
+    + '<div class="sum-line">' + esc(summaryLine()) + '</div>';
+  openSheet(html);
+}
+
+/* =========================================================
+   9. 날씨
+   ========================================================= */
+var W_URL = 'https://api.open-meteo.com/v1/forecast?latitude=37.8813&longitude=127.7298&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FSeoul';
+var AQ_URL = 'https://air-quality-api.open-meteo.com/v1/air-quality?latitude=37.8813&longitude=127.7298&current=pm10,pm2_5&timezone=Asia%2FSeoul';
+var weatherBusy = false;
+
+function getJSON(url, ms){
+  return new Promise(function(resolve, reject){
+    var ctrl = null;
+    var timer = null;
+    var done = false;
+    function finish(ok, val){
+      if(done) return;
+      done = true;
+      if(timer) clearTimeout(timer);
+      if(ok) resolve(val); else reject(val);
+    }
+    try{ if(window.AbortController) ctrl = new AbortController(); }catch(e){ ctrl = null; }
+    timer = setTimeout(function(){
+      if(ctrl){ try{ ctrl.abort(); }catch(e){} }
+      finish(false, new Error('timeout'));
+    }, ms || 6000);
+    try{
+      fetch(url, ctrl ? { signal: ctrl.signal } : {}).then(function(r){
+        if(!r.ok) throw new Error('http ' + r.status);
+        return r.json();
+      }).then(function(j){ finish(true, j); })
+        .catch(function(e){ finish(false, e); });
+    }catch(e){ finish(false, e); }
+  });
+}
+
+function weatherInfo(code){
+  var c = Number(code);
+  if(c === 0) return { label: '맑음', kind: 'sun' };
+  if(c === 1) return { label: '대체로 맑음', kind: 'part' };
+  if(c === 2) return { label: '구름 조금', kind: 'part' };
+  if(c === 3) return { label: '흐림', kind: 'cloud' };
+  if(c === 45 || c === 48) return { label: '안개', kind: 'fog' };
+  if(c >= 51 && c <= 57) return { label: '이슬비', kind: 'rain' };
+  if(c >= 61 && c <= 67) return { label: '비', kind: 'rain' };
+  if(c >= 71 && c <= 77) return { label: '눈', kind: 'snow' };
+  if(c >= 80 && c <= 82) return { label: '소나기', kind: 'rain' };
+  if(c === 85 || c === 86) return { label: '눈 소나기', kind: 'snow' };
+  if(c >= 95) return { label: '천둥번개', kind: 'storm' };
+  return { label: '구름', kind: 'cloud' };
+}
+
+function cloudShape(){
+  return '<g fill="#FFFCF6" stroke="#E3D6C4" stroke-width="2" stroke-linejoin="round">'
+    + '<ellipse cx="25" cy="38" rx="11" ry="9"/>'
+    + '<ellipse cx="39" cy="36" rx="10" ry="8.5"/>'
+    + '<rect x="16" y="37" width="33" height="11" rx="5.5"/>'
+    + '</g>';
+}
+
+function wIcon(kind){
+  var head = '<svg viewBox="0 0 64 64" aria-hidden="true">';
+  var sun = '<circle cx="32" cy="32" r="12.5" fill="#FFC64B"/><circle cx="32" cy="32" r="8.5" fill="#FFDA80"/>'
+    + '<g stroke="#FFC64B" stroke-width="3.2" stroke-linecap="round">'
+    + '<line x1="32" y1="7" x2="32" y2="14"/><line x1="32" y1="50" x2="32" y2="57"/>'
+    + '<line x1="7" y1="32" x2="14" y2="32"/><line x1="50" y1="32" x2="57" y2="32"/>'
+    + '<line x1="14" y1="14" x2="18.6" y2="18.6"/><line x1="45.4" y1="45.4" x2="50" y2="50"/>'
+    + '<line x1="50" y1="14" x2="45.4" y2="18.6"/><line x1="18.6" y1="45.4" x2="14" y2="50"/>'
+    + '</g>';
+  if(kind === 'sun') return head + sun + '</svg>';
+  if(kind === 'part'){
+    return head
+      + '<circle cx="23" cy="22" r="9" fill="#FFCF5C"/>'
+      + '<g stroke="#FFCF5C" stroke-width="2.6" stroke-linecap="round">'
+      + '<line x1="23" y1="6" x2="23" y2="10"/><line x1="8" y1="22" x2="12" y2="22"/><line x1="12.5" y1="11.5" x2="15.5" y2="14.5"/>'
+      + '</g>' + cloudShape() + '</svg>';
+  }
+  if(kind === 'cloud') return head + cloudShape() + '</svg>';
+  if(kind === 'fog'){
+    return head + cloudShape()
+      + '<g stroke="#C9BCA9" stroke-width="2.6" stroke-linecap="round"><line x1="16" y1="52" x2="48" y2="52"/><line x1="20" y1="57" x2="44" y2="57"/></g>'
+      + '</svg>';
+  }
+  if(kind === 'rain'){
+    return head + cloudShape()
+      + '<g stroke="#79B2E6" stroke-width="2.8" stroke-linecap="round">'
+      + '<line x1="23" y1="49" x2="21" y2="56"/><line x1="32" y1="49" x2="30" y2="56"/><line x1="41" y1="49" x2="39" y2="56"/>'
+      + '</g></svg>';
+  }
+  if(kind === 'snow'){
+    return head + cloudShape()
+      + '<g fill="#9CC6EC"><circle cx="23" cy="53" r="2.6"/><circle cx="32" cy="56" r="2.6"/><circle cx="41" cy="53" r="2.6"/></g>'
+      + '</svg>';
+  }
+  if(kind === 'storm'){
+    return head + cloudShape()
+      + '<path d="M34 46l-8 12h6l-3 9 11-13h-6l4-8z" fill="#FFC64B" stroke="#E8A93A" stroke-width="1.4" stroke-linejoin="round"/>'
+      + '</svg>';
+  }
+  return head + cloudShape() + '</svg>';
+}
+
+function gradePM(kind, v){
+  if(v === null || v === undefined || !isFinite(Number(v))) return null;
+  var n = Number(v);
+  var t = kind === 'pm10' ? [30, 80, 150] : [15, 35, 75];
+  if(n <= t[0]) return { label: '좋음', cls: 'good' };
+  if(n <= t[1]) return { label: '보통', cls: 'ok' };
+  if(n <= t[2]) return { label: '나쁨', cls: 'bad' };
+  return { label: '매우 나쁨', cls: 'verybad' };
+}
+
+function isRain(code){ code = Number(code); return (code >= 51 && code <= 67) || (code >= 80 && code <= 82) || code >= 95; }
+function isSnow(code){ code = Number(code); return (code >= 71 && code <= 77) || code === 85 || code === 86; }
+
+function adviceFor(code, g10, g25){
+  if(code >= 95) return '⛈️ 천둥 조심, 실내에서 쉬어요';
+  if((g25 && (g25.cls === 'bad' || g25.cls === 'verybad')) || (g10 && g10.cls === 'verybad')) return '😷 마스크 챙겨요';
+  if(isSnow(code)) return '🧣 따뜻하게 입어요';
+  if(isRain(code)) return '☔ 우산 챙겨요';
+  if(g10 && g25 && g10.cls === 'good' && g25.cls === 'good') return '🌿 공기 좋아요, 환기 좋아요';
+  return '🌤️ 가벼운 외출 좋아요';
+}
+
+function setBadge(el, kind, grade, label){
+  if(!el) return;
+  el.className = 'badge' + (grade ? ' ' + grade.cls : '');
+  el.textContent = label + ' ' + (grade ? grade.label : '–');
+}
+
+function paintWeather(w, aq, ts, stale){
+  var cur = w && w.current ? w.current : null;
+  var daily = w && w.daily ? w.daily : null;
+  if(cur){
+    var info = weatherInfo(cur.weather_code);
+    $('#wIcon').innerHTML = wIcon(info.kind);
+    $('#wTemp').textContent = Math.round(Number(cur.temperature_2m)) + '°';
+    $('#wDesc').textContent = info.label;
+    if(daily && daily.temperature_2m_min && daily.temperature_2m_max){
+      var lo = Math.round(Number(daily.temperature_2m_min[0]));
+      var hi = Math.round(Number(daily.temperature_2m_max[0]));
+      $('#wRange').textContent = '최저 ' + lo + '° · 최고 ' + hi + '°';
+    }
+  }else{
+    $('#wIcon').innerHTML = wIcon('cloud');
+    $('#wTemp').textContent = '–°';
+    $('#wDesc').textContent = '날씨 정보 없음';
+    $('#wRange').textContent = '';
+  }
+  var pm10 = aq && aq.current ? aq.current.pm10 : null;
+  var pm25 = aq && aq.current ? aq.current.pm2_5 : null;
+  var g10 = gradePM('pm10', pm10);
+  var g25 = gradePM('pm25', pm25);
+  setBadge($('#pm10Badge'), 'pm10', g10, '미세먼지');
+  setBadge($('#pm25Badge'), 'pm25', g25, '초미세먼지');
+  var adv = adviceFor(cur ? cur.weather_code : 0, g10, g25);
+  $('#wAdvice').textContent = adv;
+  var note = '';
+  if(stale && ts){
+    var d = new Date(ts);
+    note = '저장된 정보 · ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ' 기준';
+  }else if(ts){
+    var d2 = new Date(ts);
+    note = '방금 업데이트 · ' + pad2(d2.getHours()) + ':' + pad2(d2.getMinutes());
+  }
+  $('#wNote').textContent = note;
+}
+
+function paintWeatherFail(){
+  $('#wIcon').innerHTML = wIcon('cloud');
+  $('#wTemp').textContent = '–°';
+  $('#wDesc').textContent = '날씨를 불러오지 못했어요';
+  $('#wRange').textContent = '눌러서 다시 시도';
+  setBadge($('#pm10Badge'), 'pm10', null, '미세먼지');
+  setBadge($('#pm25Badge'), 'pm25', null, '초미세먼지');
+  $('#wAdvice').textContent = '🌿 오늘도 좋은 하루';
+  $('#wNote').textContent = '인터넷이 연결되면 자동으로 채워져요';
+}
+
+function getWeatherCache(){
+  try{
+    var raw = localStorage.getItem(WKEY);
+    if(!raw) return null;
+    var c = JSON.parse(raw);
+    if(!c || !c.ts) return null;
+    if(Date.now() - c.ts > 1000 * 60 * 60 * 8) return null;
+    return c;
+  }catch(e){ return null; }
+}
+function setWeatherCache(obj){
+  try{ localStorage.setItem(WKEY, JSON.stringify(obj)); }catch(e){}
+}
+
+function loadWeather(){
+  if(weatherBusy) return;
+  var cached = getWeatherCache();
+  if(cached) paintWeather(cached.w, cached.aq, cached.ts, true);
+
+  if(navigator.onLine === false){
+    if(!cached) paintWeatherFail();
+    return;
+  }
+  weatherBusy = true;
+  var pw = getJSON(W_URL, 6500).catch(function(){ return null; });
+  var pa = getJSON(AQ_URL, 6500).catch(function(){ return null; });
+  Promise.all([pw, pa]).then(function(res){
+    weatherBusy = false;
+    var w = res[0];
+    var aq = res[1];
+    if(w || aq){
+      var ts = Date.now();
+      paintWeather(w, aq, ts, false);
+      setWeatherCache({ w: w, aq: aq, ts: ts });
+    }else if(!cached){
+      paintWeatherFail();
+    }else{
+      toast('날씨를 새로 불러오지 못했어요');
+    }
+  }).catch(function(){
+    weatherBusy = false;
+    if(!cached) paintWeatherFail();
+  });
+}
+
+/* =========================================================
+   10. 헤더 · 화면 갱신
+   ========================================================= */
+function renderHeaderDate(){
+  var d = new Date();
+  var label = (d.getMonth() + 1) + '월 ' + d.getDate() + '일 ' + DOW[d.getDay()] + '요일';
+  var el = $('#todayLabel');
+  if(el) el.innerHTML = '<b>' + label + '</b>';
+}
+
+function renderAll(){
+  buildFamily();
+  renderMembers();
+  renderHeaderDate();
+  renderStamps();
+  renderMission(false);
+}
+
+/* =========================================================
+   11. 이벤트
+   ========================================================= */
+var viewMonth = new Date();
+viewMonth.setDate(1);
+
+function bindEvents(){
+  // header
+  $('#btnSettings').addEventListener('click', openSettings);
+  $('#btnSummary').addEventListener('click', openSummary);
+  $('#btnFull').addEventListener('click', function(){
+    var el = document.documentElement;
+    if(document.fullscreenElement){
+      if(document.exitFullscreen) document.exitFullscreen();
+      return;
+    }
+    if(el.requestFullscreen){
+      el.requestFullscreen().catch(function(){ toast('이 브라우저에서는 전체화면이 안 돼요'); });
+    }else{
+      toast('홈 화면에 추가하면 앱처럼 쓸 수 있어요');
+    }
+  });
+
+  // weather (tap = refresh)
+  var wc = $('#weatherCard');
+  function refreshWeather(e){
+    if(e){ e.preventDefault(); }
+    loadWeather();
+  }
+  wc.addEventListener('click', refreshWeather);
+  wc.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){ refreshWeather(e); }
+  });
+
+  // family
+  var fam = $('#familyList');
+  fam.addEventListener('click', function(e){
+    var btn = e.target.closest ? e.target.closest('[data-act]') : null;
+    if(btn){
+      var id = btn.getAttribute('data-id');
+      var act = btn.getAttribute('data-act');
+      if(act === 'plus'){ addStars(id, 1, '직접 적립'); }
+      else if(act === 'minus'){ useStar(id); }
+      else if(act === 'piggy'){ openMemberSheet(id); }
+      return;
+    }
+    var card = e.target.closest ? e.target.closest('[data-member]') : null;
+    if(card) openMemberSheet(card.getAttribute('data-member'));
+  });
+  fam.addEventListener('keydown', function(e){
+    if(e.key !== 'Enter' && e.key !== ' ') return;
+    var card = e.target.closest ? e.target.closest('[data-member]') : null;
+    if(card){ e.preventDefault(); openMemberSheet(card.getAttribute('data-member')); }
+  });
+
+  // stamps (week)
+  $('#slots').addEventListener('click', function(e){
+    var el = e.target.closest ? e.target.closest('[data-stamp]') : null;
+    if(el) toggleStamp(el.getAttribute('data-stamp'));
+  });
+
+  // mission
+  $('#btnMissionDone').addEventListener('click', completeMission);
+  $('#btnMissionNew').addEventListener('click', drawMission);
+
+  // calendar
+  $('#btnCalendar').addEventListener('click', function(){
+    viewMonth = new Date();
+    viewMonth.setDate(1);
+    openCalendar();
+  });
+
+  // sheet delegation
+  sheetBody.addEventListener('click', function(e){
+    var el = e.target.closest ? e.target.closest('[data-act]') : null;
+    if(!el) return;
+    var act = el.getAttribute('data-act');
+    var id = el.getAttribute('data-id');
+
+    if(act === 'close'){ closeSheet(); return; }
+
+    if(act === 'earn' && id){ addStars(id, 1, '직접 적립'); refreshSheet(function(){ openMemberSheet(id); }); return; }
+    if(act === 'use' && id){ useStar(id); refreshSheet(function(){ openMemberSheet(id); }); return; }
+
+    if(act === 'saveGoal' && id){
+      var tEl = $('#goalText');
+      var sEl = $('#goalStars');
+      var m = state.members[id];
+      if(m){
+        m.goalText = (tEl && tEl.value ? tEl.value : '').trim().slice(0, 40);
+        var n = sEl ? parseInt(sEl.value, 10) : 20;
+        m.goalStars = (n > 0 && n < 1000) ? n : 20;
+        save();
+        toast('목표를 저장했어요 🎯');
+        refreshSheet(function(){ openMemberSheet(id); });
+      }
+      return;
+    }
+
+    if(act === 'prevMonth'){
+      viewMonth.setMonth(viewMonth.getMonth() - 1);
+      openCalendar();
+      return;
+    }
+    if(act === 'nextMonth'){
+      viewMonth.setMonth(viewMonth.getMonth() + 1);
+      openCalendar();
+      return;
+    }
+
+    if(act === 'addMission'){
+      var input = $('#newMission');
+      var text = input && input.value ? input.value.trim().slice(0, 30) : '';
+      if(!text){ toast('미션 내용을 적어주세요'); if(input) input.focus(); return; }
+      var icons = ['🌱','💛','🌟','🍀','🎈','🐣','🍎','🌈'];
+      state.customMissions.push({ id: 'c' + Date.now(), icon: icons[state.customMissions.length % icons.length], text: text });
+      save();
+      if(input) input.value = '';
+      renderCustomList();
+      toast('가족 미션을 추가했어요');
+      return;
+    }
+    if(act === 'delMission'){
+      var cid = el.getAttribute('data-cid');
+      state.customMissions = state.customMissions.filter(function(c){ return c.id !== cid; });
+      save();
+      renderCustomList();
+      renderMission(false);
+      toast('미션을 지웠어요');
+      return;
+    }
+
+    if(act === 'export'){
+      var data = JSON.stringify(state, null, 2);
+      var box = $('#backupText');
+      if(box) box.value = data;
+      try{
+        var blob = new Blob([data], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = '우리-가족-기록장-백업-' + todayYmd() + '.json';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function(){
+          try{ URL.revokeObjectURL(url); }catch(e){}
+          if(a.parentNode) a.parentNode.removeChild(a);
+        }, 900);
+        toast('백업 파일을 만들었어요');
+      }catch(e){
+        toast('파일 저장이 안 돼요. 아래 복사 버튼을 써주세요');
+      }
+      return;
+    }
+    if(act === 'copy'){
+      var data2 = JSON.stringify(state, null, 2);
+      var box2 = $('#backupText');
+      if(box2) box2.value = data2;
+      var done = function(){ toast('백업 내용을 복사했어요 ✅'); };
+      var fail = function(){
+        if(box2){ box2.focus(); box2.select(); }
+        toast('복사가 안 되면 직접 선택해서 복사해 주세요');
+      };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(data2).then(done).catch(fail);
+      }else{
+        fail();
+      }
+      return;
+    }
+    if(act === 'restoreText'){
+      var box3 = $('#backupText');
+      var txt = box3 ? box3.value : '';
+      if(!txt || !txt.trim()){ toast('복원할 JSON을 붙여넣어 주세요'); return; }
+      applyRestore(txt);
+      return;
+    }
+    if(act === 'resetAll'){
+      var btn = el;
+      if(btn.getAttribute('data-armed') === '1'){
+        state = defaultState();
+        save();
+        renderAll();
+        closeSheet();
+        toast('모든 기록을 지웠어요');
+        return;
+      }
+      btn.setAttribute('data-armed', '1');
+      btn.textContent = '한 번 더 누르면 모두 지워요';
+      var note = $('#resetNote');
+      if(note) note.textContent = '정말 지우려면 버튼을 한 번 더 눌러주세요.';
+      setTimeout(function(){
+        if(btn && btn.getAttribute('data-armed') === '1'){
+          btn.removeAttribute('data-armed');
+          btn.textContent = '모든 기록 지우기';
+        }
+      }, 4500);
+      return;
+    }
+  });
+
+  // calendar day taps
+  sheetBody.addEventListener('click', function(e){
+    var day = e.target.closest ? e.target.closest('[data-cal]') : null;
+    if(!day) return;
+    toggleStamp(day.getAttribute('data-cal'));
+    openCalendar();
+  });
+
+  // close sheet
+  backdrop.addEventListener('click', function(e){
+    if(e.target === backdrop) closeSheet();
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && backdrop.classList.contains('open')) closeSheet();
+  });
+
+  // 날짜가 바뀌면 다시 그리기
+  var lastDay = todayYmd();
+  setInterval(function(){
+    var now = todayYmd();
+    if(now !== lastDay){
+      lastDay = now;
+      renderAll();
+    }
+  }, 60000);
+
+  window.addEventListener('online', function(){ loadWeather(); });
+}
+
+/* =========================================================
+   12. 시작
+   ========================================================= */
+$('#logo').innerHTML = LOGO;
+renderAll();
+bindEvents();
+loadWeather();
+})();
+</script>
+</body>
+</html>
