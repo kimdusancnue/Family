@@ -1100,6 +1100,12 @@ function boot(){
         boxMesh(3.3, 2.2, 0.12, MAT.wood, -15, y0 + 1.85, -24.84);
       }
 
+      /* ---- 복도 벽 하단 띠 ---- */
+      boxMesh(68, 0.95, 0.06, std(0xdfe9ec, 0.95), 0, y0 + 0.48, -20.84, false, false);
+      boxMesh(68, 0.95, 0.06, std(0xdfe9ec, 0.95), 0, y0 + 0.48, -25.16, false, false);
+      boxMesh(68, 0.1, 0.09, MAT.band2, 0, y0 + 0.98, -20.83, false, false);
+      boxMesh(68, 0.1, 0.09, MAT.band2, 0, y0 + 0.98, -25.17, false, false);
+
       /* ---- 복도 게시판 ---- */
       if (f === 0) {
         var nb = new T.Mesh(new T.PlaneGeometry(3.4, 2.2), new T.MeshStandardMaterial({ map: TEX.notice, roughness: 0.85 }));
