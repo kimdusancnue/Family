@@ -113,7 +113,78 @@ canvas{display:block}
 #fade.on{opacity:1}
 #viewBtn{position:fixed;right:10px;top:calc(10px + env(safe-area-inset-top));transform:translateY(52px);z-index:22;display:none}
 
+/* ---------- 멀티플레이: 상태 · 채팅 ---------- */
+#mpBar{position:fixed;top:calc(64px + env(safe-area-inset-top));left:12px;z-index:21;display:flex;gap:6px;align-items:center;
+  flex-wrap:wrap;max-width:calc(100vw - 24px)}
+#mpBadge{display:inline-flex;align-items:center;gap:7px;border:0;cursor:pointer;font:inherit;font-size:12px;font-weight:800;
+  color:#17553a;background:rgba(255,255,255,.93);padding:7px 12px;border-radius:999px;box-shadow:var(--shadow);backdrop-filter:blur(6px)}
+#mpBadge .dot{width:8px;height:8px;border-radius:50%;background:#9aa8a1;transition:background .2s}
+#mpBadge.on .dot{background:#2f9e62;box-shadow:0 0 0 3px rgba(47,158,98,.2)}
+#mpBadge.connecting .dot{background:#f0b429;box-shadow:0 0 0 3px rgba(240,180,41,.22)}
+#mpBadge.off .dot{background:#c9554b;box-shadow:0 0 0 3px rgba(201,85,75,.2)}
+#mpBadge:active{transform:scale(.98)}
+#mpInvite{display:none;border:0;cursor:pointer;font:inherit;font-size:12px;font-weight:800;color:#fff;background:var(--green);
+  padding:7px 12px;border-radius:999px;box-shadow:var(--shadow)}
+#mpInvite.on{display:inline-block}
+#mpInvite:active{transform:scale(.97)}
+
+#chatBox{position:fixed;left:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:21;width:min(278px,calc(100vw - 24px));
+  background:var(--panel);border-radius:16px;box-shadow:var(--shadow);backdrop-filter:blur(8px);overflow:hidden;
+  display:flex;flex-direction:column;transition:transform .18s ease}
+#chatBox.hidden{display:none !important}
+#chatHead{display:flex;align-items:center;gap:7px;padding:9px 10px 9px 13px;cursor:pointer;font-size:12.5px;font-weight:800;color:var(--ink)}
+#chatHead .cv{font-size:13px}
+#chatHead .sp{flex:1}
+#chatHead .tg{font-size:10.5px;color:var(--ink-soft);font-weight:800;transition:transform .2s}
+#chatBox.collapsed .tg{transform:rotate(180deg)}
+#chatLog{max-height:156px;min-height:54px;overflow-y:auto;padding:0 11px 6px;font-size:12.5px;line-height:1.5;
+  display:flex;flex-direction:column;gap:3px;-webkit-user-select:text;user-select:text;overscroll-behavior:contain}
+#chatLog .m{word-break:break-word}
+#chatLog .m b{color:var(--green-d);font-weight:800}
+#chatLog .m.me b{color:#2a62a6}
+#chatLog .m.sys{color:var(--ink-soft);font-size:11px;line-height:1.45}
+#chatRow{display:flex;gap:6px;padding:0 8px 8px}
+#chatInput{flex:1;min-width:0;border:1px solid #d5e2d8;border-radius:10px;padding:8px 10px;font:inherit;font-size:13px;
+  background:#f7faf8;color:var(--ink);-webkit-user-select:text;user-select:text}
+#chatInput:focus{outline:2px solid rgba(47,158,98,.35);border-color:var(--green-l)}
+#chatSend{border:0;cursor:pointer;font:inherit;font-size:12.5px;font-weight:800;color:#fff;background:var(--green);
+  border-radius:10px;padding:0 13px}
+#chatBox.collapsed #chatLog,#chatBox.collapsed #chatRow{display:none}
+
+/* ---------- 멀티플레이: 입장 모달 ---------- */
+#join{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:18px;
+  background:radial-gradient(130% 100% at 50% 0%,rgba(143,208,240,.44),rgba(12,40,30,.54));backdrop-filter:blur(3px)}
+#join.hidden{display:none !important}
+#joinCard{width:min(392px,100%);background:rgba(255,255,255,.96);border-radius:24px;box-shadow:0 20px 54px rgba(10,38,28,.34);
+  padding:20px 20px 14px;max-height:94vh;overflow:auto;backdrop-filter:blur(10px)}
+#joinCard .jh{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+#joinCard .jh .jj{font-size:30px;line-height:1}
+#joinCard .jh b{display:block;font-size:16.5px;letter-spacing:-.3px}
+#joinCard .jh span{display:block;font-size:11.5px;color:var(--ink-soft);margin-top:2px}
+#joinCard label.fl{display:block;font-size:11.5px;font-weight:800;color:var(--ink-soft);margin:12px 2px 5px}
+#joinCard input{width:100%;border:1px solid #d5e2d8;border-radius:12px;padding:11px 12px;font:inherit;font-size:14px;
+  background:#f7faf8;color:var(--ink);-webkit-user-select:text;user-select:text}
+#joinCard input:focus{outline:2px solid rgba(47,158,98,.35);border-color:var(--green-l)}
+#joinColors{display:flex;gap:9px}
+.cbtn{width:39px;height:39px;border-radius:50%;border:3px solid rgba(255,255,255,.92);cursor:pointer;
+  box-shadow:0 2px 8px rgba(20,60,45,.2);transition:transform .12s,box-shadow .12s;padding:0}
+.cbtn.on{transform:scale(1.1);border-color:#22302a;box-shadow:0 0 0 3px rgba(47,158,98,.3)}
+#joinBtn{width:100%;margin-top:16px;border:0;cursor:pointer;font:inherit;font-size:15px;font-weight:800;color:#fff;
+  background:linear-gradient(180deg,#3dae70,#26874f);padding:13px 0;border-radius:14px;box-shadow:0 6px 18px rgba(38,135,79,.32)}
+#joinBtn:active{transform:scale(.985)}
+#joinBtn[disabled]{opacity:.6;box-shadow:none}
+#joinSkip{width:100%;margin-top:6px;border:0;background:transparent;cursor:pointer;font:inherit;font-size:12.5px;
+  font-weight:700;color:var(--ink-soft);padding:9px 0;border-radius:12px}
+#joinSkip:hover{background:#f2f7f3}
+.jnote{margin-top:10px;font-size:11px;line-height:1.55;color:var(--ink-soft);text-align:center;background:#f2f7f3;
+  border-radius:12px;padding:9px 10px}
+.jnote b{color:var(--green-d)}
+.jnote.warn{background:#fff4e2;color:#8a5a1a}
+
 @media (max-width:520px){
+  #chatBox{bottom:calc(162px + env(safe-area-inset-bottom));width:min(234px,66vw)}
+  #chatLog{max-height:116px}
+  #mpBar{top:calc(58px + env(safe-area-inset-top))}
   #elevPanel{bottom:calc(168px + env(safe-area-inset-bottom));width:min(272px,74vw);padding:12px 12px 10px}
   #elevDisp{font-size:22px;margin:0 0 6px}
   .elevBtn{padding:10px 0;font-size:13px}
@@ -170,6 +241,36 @@ canvas{display:block}
   <b>이동</b> <span class="kbd">W A S D</span> / 방향키 &nbsp;·&nbsp; <b>시점</b> 마우스 드래그 &nbsp;·&nbsp; <b>점프</b> <span class="kbd">Space</span><br>
   <b>상호작용</b> <span class="kbd">E</span> &nbsp;·&nbsp; <b>시점 전환</b> <span class="kbd">V</span><br>
   엘리베이터를 타고 2·3층 교실까지 올라가 보세요! 🛗
+</div>
+
+<div id="mpBar" class="hidden">
+  <button id="mpBadge" class="" title="접속 현황 / 방 정보"><span class="dot"></span><span id="mpCount">함께 걷기</span></button>
+  <button id="mpInvite" title="같은 방 초대 링크 복사">🔗 초대 링크</button>
+</div>
+
+<div id="chatBox" class="hidden collapsed">
+  <div id="chatHead"><span class="cv">💬</span><span>채팅</span><span class="sp"></span><span class="tg">▾</span></div>
+  <div id="chatLog"></div>
+  <div id="chatRow">
+    <input id="chatInput" type="text" maxlength="120" placeholder="메시지 입력…" autocomplete="off" enterkeyhint="send">
+    <button id="chatSend">보내기</button>
+  </div>
+</div>
+
+<div id="join" class="hidden">
+  <div id="joinCard">
+    <div class="jh"><span class="jj">🧑‍🤝‍🧑</span><div><b>친구들과 함께 걷기</b><span>석화초 3D 메타버스 · 실시간 멀티플레이</span></div></div>
+    <label class="fl" for="joinNick">닉네임</label>
+    <input id="joinNick" type="text" maxlength="10" placeholder="석화친구12" autocomplete="off">
+    <label class="fl">옷 색깔</label>
+    <div id="joinColors"></div>
+    <label class="fl" for="joinRoom">방 이름 (같은 이름이면 같은 방)</label>
+    <input id="joinRoom" type="text" maxlength="16" placeholder="1반" autocomplete="off">
+    <button id="joinBtn">입장하기</button>
+    <button id="joinSkip">혼자 둘러보기</button>
+    <div class="jnote" id="joinNote">입장하면 같은 방 친구들의 아바타가 보이고 채팅으로 이야기할 수 있어요.<br>
+      <b>초대 링크를 복사</b>해 친구에게 보내면 같은 방으로 바로 들어옵니다.</div>
+  </div>
 </div>
 
 <div id="fade"></div>
@@ -1585,13 +1686,17 @@ function boot(){
   ===================================================================== */
   var avatar = new T.Group();
   var AV = {};
-  function buildAvatar() {
+  /* 옷 색만 바꿔 같은 모양의 아바타를 찍어낸다 (내 아바타 · 친구 아바타 공용) */
+  function makeRig(topColor) {
+    var rig = new T.Group(), A = {};
     var skin = std(0xf6cfa9, 0.85), hairM = std(0x3a2a22, 0.9);
-    var top = std(0x2f6fb5, 0.85), top2 = std(0x9fd3ea, 0.85);
+    var col = new T.Color(topColor === undefined ? 0x2f6fb5 : topColor);
+    var top = new T.MeshStandardMaterial({ color: col, roughness: 0.85 });
+    var top2 = new T.MeshStandardMaterial({ color: col.clone().lerp(new T.Color(0xffffff), 0.5), roughness: 0.85 });
     var bottom = std(0x3c4a5c, 0.9), shoe = std(0xf2f2f2, 0.8);
     var body = new T.Group();
-    avatar.add(body);
-    AV.body = body;
+    rig.add(body);
+    A.body = body;
 
     function limb(w, h, d, mat, px, py, pz, isLeg) {
       var g = new T.Group(); g.position.set(px, py, pz);
@@ -1604,8 +1709,8 @@ function boot(){
       }
       return g;
     }
-    AV.legL = limb(0.17, 0.6, 0.19, bottom, -0.13, 0.62, 0, true);
-    AV.legR = limb(0.17, 0.6, 0.19, bottom, 0.13, 0.62, 0, true);
+    A.legL = limb(0.17, 0.6, 0.19, bottom, -0.13, 0.62, 0, true);
+    A.legR = limb(0.17, 0.6, 0.19, bottom, 0.13, 0.62, 0, true);
 
     var torso = new T.Mesh(new T.BoxGeometry(0.52, 0.56, 0.3), top);
     torso.position.y = 0.9; torso.castShadow = true; body.add(torso);
@@ -1614,8 +1719,8 @@ function boot(){
     var belt = new T.Mesh(new T.BoxGeometry(0.53, 0.07, 0.31), std(0x22303c, 0.9));
     belt.position.y = 0.63; body.add(belt);
 
-    AV.armL = limb(0.13, 0.5, 0.15, top, -0.33, 1.12, 0);
-    AV.armR = limb(0.13, 0.5, 0.15, top, 0.33, 1.12, 0);
+    A.armL = limb(0.13, 0.5, 0.15, top, -0.33, 1.12, 0);
+    A.armR = limb(0.13, 0.5, 0.15, top, 0.33, 1.12, 0);
     var handL = new T.Mesh(new T.SphereGeometry(0.075, 8, 6), skin); handL.position.set(-0.33, 0.6, 0); body.add(handL);
     var handR = new T.Mesh(new T.SphereGeometry(0.075, 8, 6), skin); handR.position.set(0.33, 0.6, 0); body.add(handR);
 
@@ -1642,6 +1747,19 @@ function boot(){
     var packTop = new T.Mesh(new T.BoxGeometry(0.36, 0.1, 0.2), std(0xc9742c, 0.85));
     packTop.position.set(0, 1.18, -0.24); body.add(packTop);
 
+    A.topMat = top; A.top2Mat = top2;
+    A.setCloth = function (hex) {
+      var c = new T.Color(hex);
+      top.color.copy(c);
+      top2.color.copy(c.clone().lerp(new T.Color(0xffffff), 0.5));
+    };
+    return { group: rig, AV: A };
+  }
+
+  function buildAvatar() {
+    var r = makeRig(0x2f6fb5);
+    avatar.add(r.group);
+    AV = r.AV;
     avatar.position.set(0, 0, 47);
     scene.add(avatar);
   }
@@ -2102,10 +2220,531 @@ function boot(){
   function toggleView() { setView(player.view === 'third' ? 'first' : 'third'); }
 
   /* =====================================================================
+     15.5 멀티플레이 · MQTT over WebSocket
+     공개 무료 브로커(EMQX · HiveMQ · mosquitto)에 방별 토픽으로 붙어
+     위치·회전·모습·채팅을 주고받는다. 서버 설치가 필요 없다.
+  ===================================================================== */
+  var MP_PREFIX = 'seokhwa-metaverse-v1/';
+  var MP_BROKERS = [
+    'wss://broker.emqx.io:8084/mqtt',
+    'wss://broker.hivemq.com:8884/mqtt',
+    'wss://test.mosquitto.org:8081/mqtt'
+  ];
+  var MP_COLORS = [
+    { n: '파랑', c: 0x2f6fb5 }, { n: '초록', c: 0x2f9e62 }, { n: '분홍', c: 0xe1799d },
+    { n: '노랑', c: 0xf1b93b }, { n: '보라', c: 0x8a6fd0 }
+  ];
+  var MP = {
+    on: false, room: '', nick: '', color: 0, id: '', code: '', topic: '',
+    client: null, status: 'idle', token: 0, peers: {},
+    acc: 0, ping: 0, selfLabel: null, lastHi: 0
+  };
+  var ownBubble = null;
+  var mpRound = function (v) { return Math.round(v * 100) / 100; };
+  function mpHex(c) { return '#' + ('000000' + (c >>> 0).toString(16)).slice(-6); }
+
+  /* 방 이름 → 토픽 안전 코드 (한글도 안정적으로 매핑) */
+  function mpHash(s) {
+    var h = 2166136261;
+    for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = (h * 16777619) >>> 0; }
+    return h.toString(36);
+  }
+  function mpRoomCode(name) {
+    var raw = String(name == null ? '' : name).trim().toLowerCase();
+    if (!raw) raw = '1반';
+    if (/^[a-z0-9_-]{1,32}$/.test(raw)) return raw;
+    var slug = raw.replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 16);
+    return (slug ? slug + '-' : '') + mpHash(raw).slice(0, 5);
+  }
+
+  /* ---------- 글자 스프라이트 (닉네임 라벨 · 말풍선) ---------- */
+  function mpNameSprite(text, colorHex) {
+    var fs = 40, padX = 24, padY = 13;
+    var m = cvs(8, 8).getContext('2d');
+    m.font = '700 ' + fs + 'px ' + KFONT;
+    var tw = Math.ceil(m.measureText(text).width);
+    var W = Math.max(120, tw + padX * 2 + 30), H = fs + padY * 2;
+    var c = cvs(W, H), g = c.getContext('2d');
+    g.fillStyle = 'rgba(22,42,34,.80)';
+    rr(g, 3, 6, W - 3, H - 6, (H - 12) / 2); g.fill();
+    g.fillStyle = mpHex(colorHex);
+    g.beginPath(); g.arc(padX - 4, H / 2, fs * 0.21, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#ffffff';
+    g.font = '700 ' + fs + 'px ' + KFONT;
+    g.textBaseline = 'middle';
+    g.fillText(text, padX + 14, H / 2 + 1);
+    var sp = new T.Sprite(new T.SpriteMaterial({ map: texFrom(c), transparent: true, depthWrite: false }));
+    var h = 0.25;
+    sp.scale.set(h * W / H, h, 1);
+    sp.center.set(0.5, 0);
+    return sp;
+  }
+
+  function mpBubbleSprite(text) {
+    var fs = 36, maxW = 340, padX = 22, padY = 16;
+    var m = cvs(8, 8).getContext('2d');
+    m.font = '600 ' + fs + 'px ' + KFONT;
+    var lines = [], cur = '';
+    for (var i = 0; i < text.length; i++) {
+      var ch = text.charAt(i);
+      if (ch === '\n') { lines.push(cur); cur = ''; continue; }
+      if (cur && m.measureText(cur + ch).width > maxW) { lines.push(cur); cur = ch; }
+      else cur += ch;
+    }
+    lines.push(cur);
+    if (lines.length > 4) lines = lines.slice(0, 4);
+    var lh = fs * 1.34, widest = 0;
+    for (var j = 0; j < lines.length; j++) widest = Math.max(widest, m.measureText(lines[j]).width);
+    var W = Math.ceil(widest) + padX * 2, H = Math.ceil(lines.length * lh) + padY * 2 + 16;
+    var c = cvs(Math.max(90, W), H), g = c.getContext('2d');
+    g.fillStyle = 'rgba(255,255,255,.97)';
+    rr(g, 2, 2, c.width - 2, H - 16, 18); g.fill();
+    g.strokeStyle = 'rgba(139,224,168,.95)'; g.lineWidth = 3; g.stroke();
+    g.beginPath();
+    g.moveTo(c.width / 2 - 10, H - 18); g.lineTo(c.width / 2 + 10, H - 18); g.lineTo(c.width / 2, H - 2);
+    g.closePath(); g.fillStyle = 'rgba(255,255,255,.97)'; g.fill();
+    g.fillStyle = '#22302a'; g.font = '600 ' + fs + 'px ' + KFONT; g.textBaseline = 'middle';
+    for (var k = 0; k < lines.length; k++) g.fillText(lines[k], padX, padY + lh * (k + 0.5));
+    var sp = new T.Sprite(new T.SpriteMaterial({ map: texFrom(c), transparent: true, depthWrite: false }));
+    var hh = 0.26 + 0.17 * lines.length;
+    sp.scale.set(hh * c.width / H, hh, 1);
+    sp.center.set(0.5, 0);
+    return sp;
+  }
+  function mpDisposeSprite(sp, parent) {
+    if (!sp) return;
+    if (parent) parent.remove(sp);
+    if (sp.material) {
+      if (sp.material.map) sp.material.map.dispose();
+      sp.material.dispose();
+    }
+  }
+
+  /* ---------- 상태 표시 · 채팅 로그 ---------- */
+  function mpPeerCount() { var n = 0; for (var k in MP.peers) n++; return n; }
+  function mpUpdateCount() {
+    var b = $('mpBadge'), c = $('mpCount');
+    if (!MP.on) { b.className = ''; c.textContent = '🧑‍🤝‍🧑 함께 걷기'; $('mpInvite').classList.remove('on'); return; }
+    var n = 1 + mpPeerCount();
+    if (MP.status === 'online') { b.className = 'on'; c.textContent = '🟢 ' + n + '명 접속'; }
+    else if (MP.status === 'connecting' || MP.status === 'reconnecting') { b.className = 'connecting'; c.textContent = '🟡 연결 중…'; }
+    else { b.className = 'off'; c.textContent = '🔴 ' + n + '명 · 오프라인'; }
+    if (MP.status === 'online') $('mpInvite').classList.add('on'); else $('mpInvite').classList.remove('on');
+  }
+  function mpChatSys(text) {
+    var log = $('chatLog');
+    if (!log) return;
+    var d = document.createElement('div');
+    d.className = 'm sys';
+    d.textContent = text;
+    log.appendChild(d);
+    while (log.children.length > 80) log.removeChild(log.firstChild);
+    log.scrollTop = log.scrollHeight;
+  }
+  function mpChatAdd(nick, text, me) {
+    var log = $('chatLog');
+    if (!log) return;
+    var d = document.createElement('div');
+    d.className = 'm' + (me ? ' me' : '');
+    var b = document.createElement('b');
+    b.textContent = nick;
+    d.appendChild(b);
+    d.appendChild(document.createTextNode('  ' + text));
+    log.appendChild(d);
+    while (log.children.length > 80) log.removeChild(log.firstChild);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  /* ---------- 친구 아바타 ---------- */
+  function mpPeer(id, info) {
+    var p = MP.peers[id];
+    if (p || !id || id === MP.id) return p || null;
+    var ci = clamp(parseInt(info.c, 10) || 0, 0, MP_COLORS.length - 1);
+    var rig = makeRig(MP_COLORS[ci].c);
+    var x = typeof info.x === 'number' ? info.x : 0;
+    var y = typeof info.y === 'number' ? info.y : 0;
+    var z = typeof info.z === 'number' ? info.z : 43;
+    rig.group.position.set(x, y, z);
+    scene.add(rig.group);
+    var nick = String(info.n || '친구').slice(0, 10);
+    var name = mpNameSprite(nick, MP_COLORS[ci].c);
+    name.position.y = 2.02;
+    rig.group.add(name);
+    p = MP.peers[id] = {
+      id: id, nick: nick, color: ci, rig: rig, name: name, bubble: null, bubbleUntil: 0,
+      tgt: { x: x, y: y, z: z, ry: 0 }, cur: { x: x, y: y, z: z, ry: 0 },
+      phase: 0, moving: 0, last: (typeof performance !== 'undefined' ? performance.now() : Date.now())
+    };
+    mpUpdateCount();
+    mpChatSys('🎒 ' + nick + ' 님이 들어왔어요');
+    return p;
+  }
+  function mpRemovePeer(id, quiet) {
+    var p = MP.peers[id];
+    if (!p) return;
+    if (p.bubble) mpDisposeSprite(p.bubble, p.rig.group);
+    mpDisposeSprite(p.name, p.rig.group);
+    scene.remove(p.rig.group);
+    p.rig.group.traverse(function (o) {
+      if (o.isMesh) {
+        if (o.geometry) o.geometry.dispose();
+        if (o.material) o.material.dispose();
+      }
+    });
+    delete MP.peers[id];
+    mpUpdateCount();
+    if (!quiet) mpChatSys('👋 ' + p.nick + ' 님이 나갔어요');
+  }
+  function mpClearPeers() { for (var id in MP.peers) mpRemovePeer(id, true); }
+  function mpPeerBubble(p, text) {
+    if (p.bubble) mpDisposeSprite(p.bubble, p.rig.group);
+    p.bubble = mpBubbleSprite(text);
+    p.bubble.position.y = 2.34;
+    p.rig.group.add(p.bubble);
+    p.bubbleUntil = performance.now() + 5000;
+  }
+  function mpShowOwnBubble(text) {
+    if (ownBubble) mpDisposeSprite(ownBubble, avatar);
+    ownBubble = mpBubbleSprite(text);
+    ownBubble.position.y = 2.34;
+    avatar.add(ownBubble);
+    ownBubble.userData.until = performance.now() + 5000;
+  }
+
+  /* ---------- 전송 · 수신 ---------- */
+  function mpPub(sub, obj) {
+    if (!MP.client || MP.status !== 'online' || !MP.topic) return false;
+    try { MP.client.publish(MP.topic + sub, JSON.stringify(obj), { qos: 0 }); return true; }
+    catch (e) { return false; }
+  }
+  function mpSelfInfo() { return { k: 'hb', i: MP.id, n: MP.nick, c: MP.color, t: Date.now() }; }
+
+  function mpOnMessage(topic, payload) {
+    if (!MP.topic || String(topic).indexOf(MP.topic) !== 0) return;
+    var sub = String(topic).slice(MP.topic.length);
+    var d;
+    try { d = JSON.parse(payload.toString()); } catch (e) { return; }
+    if (!d || !d.i || d.i === MP.id) return;
+    var now = performance.now();
+    if (sub === 'chat') {
+      var txt = String(d.m || '').replace(/\s+/g, ' ').trim().slice(0, 120);
+      if (!txt) return;
+      var pc = mpPeer(d.i, d);
+      if (!pc) return;
+      pc.last = now;
+      mpChatAdd(pc.nick, txt, false);
+      mpPeerBubble(pc, txt);
+      return;
+    }
+    if (sub !== 'state' && sub !== 'sys') return;
+    if (d.k === 'bye') { mpRemovePeer(d.i); return; }
+    var p = mpPeer(d.i, d);
+    if (!p) return;
+    p.last = now;
+    if (sub === 'state') {
+      if (typeof d.x === 'number') p.tgt.x = d.x;
+      if (typeof d.y === 'number') p.tgt.y = d.y;
+      if (typeof d.z === 'number') p.tgt.z = d.z;
+      if (typeof d.r === 'number') p.tgt.ry = d.r;
+      p.moving = d.v ? 1 : 0;
+    } else if (d.k === 'hi') {
+      // 새로 들어온 친구에게 내 위치를 바로 알려 준다
+      mpPub('sys', mpSelfInfo());
+      mpPub('state', mpOwnState());
+    }
+  }
+
+  function mpOwnState() {
+    var gy = groundY();
+    return {
+      i: MP.id, n: MP.nick, c: MP.color,
+      x: mpRound(player.pos.x), y: mpRound(gy + player.y), z: mpRound(player.pos.z),
+      r: mpRound(avatar.rotation.y), v: player.speed > 0.25 ? 1 : 0, t: Date.now()
+    };
+  }
+
+  /* ---------- 연결 ---------- */
+  var MQTT_CDNS = [
+    'https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js',
+    'https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.10.1/mqtt.min.js'
+  ];
+  function mpLoadLib(cb) {
+    if (window.mqtt) { cb(true); return; }
+    var i = 0;
+    (function next() {
+      if (i >= MQTT_CDNS.length) { cb(false); return; }
+      var s = document.createElement('script');
+      s.src = MQTT_CDNS[i++]; s.async = true;
+      s.onload = function () { cb(!!window.mqtt); };
+      s.onerror = function () { next(); };
+      document.head.appendChild(s);
+    })();
+  }
+
+  function mpSetStatus(s) { MP.status = s; mpUpdateCount(); }
+
+  function mpConnect() {
+    if (!MP.on) return;
+    if (!window.mqtt) {
+      mpLoadLib(function (ok) { if (ok) mpConnect(); else mpSetStatus('offline'); });
+      return;
+    }
+    if (MP.client) { try { MP.client.end(true); } catch (e) {} MP.client = null; }
+    var token = ++MP.token, k = 0;
+    mpSetStatus('connecting');
+    function attempt() {
+      if (token !== MP.token || !MP.on) return;
+      if (k >= MP_BROKERS.length) {
+        mpSetStatus('offline');
+        setTimeout(function () { if (token === MP.token && MP.on && MP.status === 'offline') mpConnect(); }, 9000);
+        return;
+      }
+      var url = MP_BROKERS[k++], settled = false, cl = null;
+      function fail() {
+        if (settled) return;
+        settled = true;
+        try { if (cl) cl.end(true); } catch (e) {}
+        if (token === MP.token) setTimeout(attempt, 200);
+      }
+      try {
+        cl = window.mqtt.connect(url, {
+          clientId: MP.id, clean: true, connectTimeout: 6000,
+          reconnectPeriod: 0, keepalive: 25, protocolVersion: 4
+        });
+      } catch (e) { fail(); return; }
+      cl.on('connect', function () {
+        if (settled) return;
+        settled = true;
+        if (token !== MP.token) { try { cl.end(true); } catch (e) {} return; }
+        mpAttach(cl);
+      });
+      cl.on('error', fail);
+      cl.on('close', fail);
+      setTimeout(fail, 7000);
+    }
+    attempt();
+  }
+
+  function mpAttach(cl) {
+    MP.client = cl;
+    try { cl.removeAllListeners('error'); cl.removeAllListeners('close'); } catch (e) {}
+    cl.on('error', function () {});
+    cl.on('message', mpOnMessage);
+    cl.on('close', function () {
+      if (MP.status !== 'online') return;
+      MP.client = null;
+      mpClearPeers();
+      mpSetStatus('reconnecting');
+      setTimeout(function () { if (MP.on && MP.status === 'reconnecting') mpConnect(); }, 1500);
+    });
+    cl.subscribe(MP.topic + '#', { qos: 0 }, function (err) {
+      if (err) { mpSetStatus('offline'); return; }
+      mpSetStatus('online');
+      mpChatSys('📡 실시간 연결 완료 · 방 "' + MP.room + '"');
+      mpPub('sys', { k: 'hi', i: MP.id, n: MP.nick, c: MP.color, t: Date.now() });
+    });
+  }
+
+  /* ---------- 입장 · 초대 ---------- */
+  function mpJoin() {
+    var nickEl = $('joinNick'), roomEl = $('joinRoom');
+    var nick = (nickEl.value || '').trim().replace(/\s+/g, ' ').slice(0, 10) || '친구';
+    var room = (roomEl.value || '').trim().slice(0, 16) || '1반';
+    MP.nick = nick; MP.room = room;
+    MP.code = mpRoomCode(room);
+    MP.topic = MP_PREFIX + MP.code + '/';
+    MP.id = 'sh_' + Math.random().toString(36).slice(2, 9);
+    MP.on = true;
+    MP.token++;
+    $('join').classList.add('hidden');
+    $('mpBar').classList.remove('hidden');
+    $('chatBox').classList.remove('hidden');
+    if (isTouch()) $('chatBox').classList.add('collapsed'); else $('chatBox').classList.remove('collapsed');
+    mpUpdateCount();
+    mpChatSys('🎒 방 "' + room + '" 에 입장했어요.');
+    mpChatSys('🔗 초대 링크를 복사해 친구에게 보내 보세요.');
+    if (MP.selfLabel) { mpDisposeSprite(MP.selfLabel, avatar); MP.selfLabel = null; }
+    MP.selfLabel = mpNameSprite(nick, MP_COLORS[MP.color].c);
+    MP.selfLabel.position.y = 2.02;
+    avatar.add(MP.selfLabel);
+    if (AV && AV.setCloth) AV.setCloth(MP_COLORS[MP.color].c);
+    try {
+      localStorage.setItem('seokhwa.mp', JSON.stringify({ nick: nick, room: room, color: MP.color }));
+    } catch (e) {}
+    mpLoadLib(function (ok) {
+      if (!ok) { mpSetStatus('offline'); mpChatSys('⚠️ 실시간 라이브러리를 불러오지 못했어요.'); return; }
+      mpConnect();
+    });
+  }
+
+  function mpCopyLink() {
+    var url;
+    try {
+      var u = new URL(location.href);
+      u.searchParams.set('room', MP.room || '1반');
+      url = u.toString();
+    } catch (e) {
+      url = location.href.split('?')[0] + '?room=' + encodeURIComponent(MP.room || '1반');
+    }
+    var done = function (ok) {
+      toast((ok ? '🔗 <b>초대 링크를 복사했어요</b>' : '🔗 <b>이 링크로 들어오면 같은 방이에요</b>') +
+        '<br><span style="font-size:11.5px;color:#4b6157;word-break:break-all">' + url + '</span>', 9000);
+    };
+    var fallback = function () {
+      try {
+        var t = document.createElement('textarea');
+        t.value = url; t.style.position = 'fixed'; t.style.opacity = '0';
+        document.body.appendChild(t); t.select();
+        var ok = document.execCommand('copy');
+        document.body.removeChild(t);
+        done(ok);
+      } catch (e) { done(false); }
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function () { done(true); }, fallback);
+    } else fallback();
+  }
+
+  function mpSendChat() {
+    var inp = $('chatInput');
+    var txt = (inp.value || '').replace(/\s+/g, ' ').trim().slice(0, 120);
+    if (!txt) return;
+    inp.value = '';
+    if (MP.status !== 'online') { mpChatSys('연결 중이라 아직 보낼 수 없어요. 잠시 후 다시 시도해 주세요.'); return; }
+    var ok = mpPub('chat', { i: MP.id, n: MP.nick, c: MP.color, m: txt, t: Date.now() });
+    mpChatAdd(MP.nick, txt, true);
+    mpShowOwnBubble(txt);
+    if (!ok) mpChatSys('메시지를 보내지 못했어요.');
+  }
+
+  function mpRenderColors() {
+    var box = $('joinColors');
+    box.innerHTML = '';
+    MP_COLORS.forEach(function (c, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'cbtn' + (i === MP.color ? ' on' : '');
+      b.style.background = mpHex(c.c);
+      b.title = c.n;
+      b.setAttribute('aria-label', c.n);
+      b.onclick = function () { MP.color = i; mpRenderColors(); };
+      box.appendChild(b);
+    });
+  }
+
+  function mpKeyFix() {
+    var box = $('chatBox');
+    if (!box || box.classList.contains('hidden')) return;
+    var kb = 0;
+    if (window.visualViewport) {
+      kb = window.innerHeight - (window.visualViewport.height + window.visualViewport.offsetTop);
+    }
+    box.style.transform = kb > 60 ? 'translateY(' + (-(kb - 10)) + 'px)' : '';
+  }
+
+  /* ---------- 매 프레임 ---------- */
+  function mpTick(dt) {
+    var now = performance.now();
+    if (ownBubble && now > ownBubble.userData.until) { mpDisposeSprite(ownBubble, avatar); ownBubble = null; }
+    if (MP.selfLabel) MP.selfLabel.visible = cam.curDist > 4.4;
+    if (!MP.on) return;
+
+    if (MP.status === 'online') {
+      if (!MP.lastPub) MP.lastPub = now;
+      if (!MP.lastPing) MP.lastPing = now;
+      if (now - MP.lastPub >= 110) { MP.lastPub = now; mpPub('state', mpOwnState()); }
+      if (now - MP.lastPing >= 2500) { MP.lastPing = now; mpPub('sys', mpSelfInfo()); }
+    }
+
+    for (var id in MP.peers) {
+      var p = MP.peers[id];
+      if (now - p.last > 10000) { mpRemovePeer(id); continue; }
+      // 멀리 순간이동(워프)했다면 부드럽게가 아니라 바로 맞춘다
+      if (Math.abs(p.tgt.x - p.cur.x) + Math.abs(p.tgt.y - p.cur.y) + Math.abs(p.tgt.z - p.cur.z) > 6) {
+        p.cur.x = p.tgt.x; p.cur.y = p.tgt.y; p.cur.z = p.tgt.z;
+      }
+      var k = Math.min(1, dt * 9);
+      p.cur.x = lerp(p.cur.x, p.tgt.x, k);
+      p.cur.y = lerp(p.cur.y, p.tgt.y, k);
+      p.cur.z = lerp(p.cur.z, p.tgt.z, k);
+      var dr = ((p.tgt.ry - p.cur.ry + Math.PI) % (Math.PI * 2)) - Math.PI;
+      if (dr < -Math.PI) dr += Math.PI * 2;
+      p.cur.ry += dr * Math.min(1, dt * 10);
+      p.rig.group.position.set(p.cur.x, p.cur.y, p.cur.z);
+      p.rig.group.rotation.y = p.cur.ry;
+      if (p.moving) p.phase += dt * 9;
+      else p.phase = lerp(p.phase, 0, Math.min(1, dt * 6));
+      var sw = Math.sin(p.phase) * 0.55;
+      var A = p.rig.AV;
+      A.legL.rotation.x = sw; A.legR.rotation.x = -sw;
+      A.armL.rotation.x = -sw * 0.85; A.armR.rotation.x = sw * 0.85;
+      A.body.position.y = Math.abs(Math.sin(p.phase)) * 0.045;
+      if (p.bubble && now > p.bubbleUntil) { mpDisposeSprite(p.bubble, p.rig.group); p.bubble = null; }
+    }
+  }
+
+  /* ---------- 초기화 ---------- */
+  function mpInit() {
+    var q = null;
+    try { q = new URLSearchParams(location.search).get('room'); } catch (e) {}
+    var pref = null;
+    try { pref = JSON.parse(localStorage.getItem('seokhwa.mp') || 'null'); } catch (e) {}
+    MP.room = String(q || (pref && pref.room) || '1반').slice(0, 16);
+    MP.nick = (pref && pref.nick) ? String(pref.nick).slice(0, 10) : '';
+    MP.color = (pref && typeof pref.color === 'number') ? clamp(pref.color, 0, MP_COLORS.length - 1) : 0;
+    $('joinNick').value = MP.nick || ('석화친구' + (10 + Math.floor(Math.random() * 90)));
+    $('joinRoom').value = MP.room;
+    mpRenderColors();
+    $('joinBtn').onclick = mpJoin;
+    $('joinSkip').onclick = function () {
+      $('join').classList.add('hidden');
+      $('mpBar').classList.remove('hidden');
+      mpUpdateCount();
+    };
+    $('joinRoom').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); mpJoin(); } });
+    $('joinNick').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); mpJoin(); } });
+    $('mpBadge').onclick = function () {
+      if (!MP.on) { $('join').classList.remove('hidden'); return; }
+      var n = 1 + mpPeerCount();
+      toast('<b>방 "' + MP.room + '"</b><br>' +
+        (MP.status === 'online' ? '🟢 ' : (MP.status === 'connecting' ? '🟡 ' : '🔴 ')) + n + '명 접속 중' +
+        (MP.status === 'online' ? '<br><span style="font-size:11.5px;color:#4b6157">' + MP_PREFIX + MP.code + '/</span>' : ''), 6000);
+    };
+    $('mpInvite').onclick = mpCopyLink;
+    $('chatHead').onclick = function () { $('chatBox').classList.toggle('collapsed'); mpKeyFix(); };
+    $('chatSend').onclick = mpSendChat;
+    var ci = $('chatInput');
+    ci.addEventListener('keydown', function (e) {
+      e.stopPropagation();
+      if (e.key === 'Enter') { e.preventDefault(); mpSendChat(); }
+      else if (e.key === 'Escape') ci.blur();
+    });
+    ci.addEventListener('focus', function () { $('chatBox').classList.remove('collapsed'); setTimeout(mpKeyFix, 60); });
+    ci.addEventListener('blur', function () { setTimeout(mpKeyFix, 60); });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', mpKeyFix);
+      window.visualViewport.addEventListener('scroll', mpKeyFix);
+    }
+    window.addEventListener('pagehide', function () {
+      if (MP.on && MP.client) { try { mpPub('sys', { k: 'bye', i: MP.id, n: MP.nick, t: Date.now() }); MP.client.end(); } catch (e) {} }
+    });
+    mpLoadLib(function () {});   // 미리 받아 두어 입장이 빨라지게
+    mpUpdateCount();
+    setTimeout(function () { if (!MP.on) $('join').classList.remove('hidden'); }, 900);
+  }
+
+  /* =====================================================================
      16. 입력
   ===================================================================== */
   function setupInput() {
     window.addEventListener('keydown', function (e) {
+      var tg = e.target;
+      if (tg && (tg.tagName === 'INPUT' || tg.tagName === 'TEXTAREA')) {
+        if (e.key === 'Escape') tg.blur();
+        return;
+      }
+      if (!$('join').classList.contains('hidden')) return;
       var k = e.key.toLowerCase();
       if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].indexOf(k) >= 0) e.preventDefault();
       keys[k] = true;
@@ -2219,6 +2858,7 @@ function boot(){
     var dt = Math.min(raw, 0.05);
     updatePlayer(dt);
     updateElevator(dt);
+    mpTick(dt);
     updateCamera(dt);
     updatePrompt();
     autoQuality(raw);
@@ -2243,6 +2883,7 @@ function boot(){
     buildElevPanel();
     setupInput();
     buildWarpUI();
+    mpInit();
     // 실내(본관 안쪽) 오브젝트는 그림자 패스에서 제외해 성능 확보
     scene.traverse(function (o) {
       if (o.isMesh && o.castShadow && Math.abs(o.position.x) < 34 && o.position.z > -29 && o.position.z < -11) {
@@ -2286,7 +2927,26 @@ function boot(){
       toasts: function () { return $('toastTxt').innerHTML; },
       frames: function () { return frameCount; },
       elevGo: function (f) { elevCall(f); },
-      version: '1.0'
+      mp: function () {
+        var list = [];
+        for (var id in MP.peers) {
+          var q = MP.peers[id];
+          list.push({
+            id: id, nick: q.nick, x: q.cur.x, y: q.cur.y, z: q.cur.z, bubble: !!q.bubble,
+            grp: { x: q.rig.group.position.x, y: q.rig.group.position.y, z: q.rig.group.position.z },
+            label: q.name.visible, color: q.color
+          });
+        }
+        return { on: MP.on, status: MP.status, room: MP.room, code: MP.code, id: MP.id, nick: MP.nick, color: MP.color, count: 1 + mpPeerCount(), peers: list, badge: $('mpCount').textContent, chat: $('chatLog').textContent };
+      },
+      mpJoin: function (nick, room, color) {
+        if (nick) $('joinNick').value = nick;
+        if (room) $('joinRoom').value = room;
+        if (typeof color === 'number') { MP.color = color; mpRenderColors(); }
+        mpJoin();
+      },
+      mpChat: function (t) { $('chatInput').value = t; mpSendChat(); },
+      version: '1.1'
     };
     window.__ready = true;
   }
