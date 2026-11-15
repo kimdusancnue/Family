@@ -2199,7 +2199,7 @@ function boot(){
     if (perf.n < 90) return;
     var fps = perf.n / perf.t;
     perf.done = true;
-    if (fps < 24) {
+    if (fps < 22) {
       renderer.shadowMap.enabled = false;
       renderer.setPixelRatio(1);
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -2209,12 +2209,13 @@ function boot(){
 
   function animate() {
     requestAnimationFrame(animate);
-    var dt = Math.min(clock.getDelta(), 0.05);
+    var raw = clock.getDelta();
+    var dt = Math.min(raw, 0.05);
     updatePlayer(dt);
     updateElevator(dt);
     updateCamera(dt);
     updatePrompt();
-    autoQuality(dt);
+    autoQuality(raw);
     if (frameCount % 3 === 0) drawMinimap();
     if (!$('elevPanel').classList.contains('hidden')) updateElevPanel();
     frameCount++;
