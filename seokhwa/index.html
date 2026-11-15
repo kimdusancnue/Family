@@ -485,17 +485,20 @@ function boot(){
       m.rotation.y = R() * 3;
       scene.add(m);
     }
-    // 캠퍼스 담장 밖 가로수
+    // 캠퍼스 담장 밖 가로수 (인스턴스)
+    var coneGeo = new T.ConeGeometry(2.2, 9, 6);
+    var cones = new T.InstancedMesh(coneGeo, MAT.leafDark, 34);
+    var mtx2 = new T.Matrix4();
     for (var k = 0; k < 34; k++) {
-      var side = k % 4;
-      var t = new T.Mesh(new T.ConeGeometry(2.2, 7 + R() * 3, 6), MAT.leafDark);
-      var px, pz;
+      var side = k % 4, px, pz;
       if (side === 0) { px = -66 - R() * 12; pz = -50 + R() * 104; }
       else if (side === 1) { px = 66 + R() * 12; pz = -50 + R() * 104; }
       else if (side === 2) { px = -60 + R() * 120; pz = 56 + R() * 10; }
       else { px = -60 + R() * 120; pz = -54 - R() * 10; }
-      t.position.set(px, 3.5, pz); scene.add(t);
+      mtx2.makeTranslation(px, 4.5, pz);
+      cones.setMatrixAt(k, mtx2);
     }
+    scene.add(cones);
   })();
 
   /* =====================================================================
@@ -990,11 +993,17 @@ function boot(){
     boxMesh(18, 0.35, 1.8, MAT.soil, -17, 0.17, -11.4, false, true);
     boxMesh(18, 0.35, 1.8, MAT.soil, 17, 0.17, -11.4, false, true);
     var R = rnd(66);
+    var roseA = [], roseB = [];
     for (var f = 0; f < 90; f++) {
       var fx = (f < 45 ? -26 : 8) + R() * 18, fz = -12.2 + R() * 1.7;
-      var fl = new T.Mesh(new T.SphereGeometry(0.16, 6, 5), std(R() > 0.4 ? 0xe2566d : 0xf2b6c4, 0.9));
-      fl.position.set(fx, 0.42, fz); scene.add(fl);
+      (R() > 0.4 ? roseA : roseB).push([fx, fz]);
     }
+    [[roseA, 0xe2566d], [roseB, 0xf2b6c4]].forEach(function (grp) {
+      var m = new T.InstancedMesh(new T.SphereGeometry(0.16, 6, 5), std(grp[1], 0.9), grp[0].length);
+      var m4 = new T.Matrix4();
+      grp[0].forEach(function (pp, idx) { m4.makeTranslation(pp[0], 0.42, pp[1]); m.setMatrixAt(idx, m4); });
+      scene.add(m);
+    });
   }
 
   /* =====================================================================
@@ -2182,6 +2191,21 @@ function boot(){
   ===================================================================== */
   var clock = new T.Clock();
   var frameCount = 0;
+  var perf = { t: 0, n: 0, done: false };
+  function autoQuality(dt) {
+    if (perf.done || LOWQ) return;
+    if (frameCount < 45) return;
+    perf.t += dt; perf.n++;
+    if (perf.n < 90) return;
+    var fps = perf.n / perf.t;
+    perf.done = true;
+    if (fps < 24) {
+      renderer.shadowMap.enabled = false;
+      renderer.setPixelRatio(1);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      if (sun) sun.castShadow = false;
+    }
+  }
 
   function animate() {
     requestAnimationFrame(animate);
@@ -2190,6 +2214,7 @@ function boot(){
     updateElevator(dt);
     updateCamera(dt);
     updatePrompt();
+    autoQuality(dt);
     if (frameCount % 3 === 0) drawMinimap();
     if (!$('elevPanel').classList.contains('hidden')) updateElevPanel();
     frameCount++;
@@ -2211,6 +2236,12 @@ function boot(){
     buildElevPanel();
     setupInput();
     buildWarpUI();
+    // 실내(본관 안쪽) 오브젝트는 그림자 패스에서 제외해 성능 확보
+    scene.traverse(function (o) {
+      if (o.isMesh && o.castShadow && Math.abs(o.position.x) < 34 && o.position.z > -29 && o.position.z < -11) {
+        o.castShadow = false;
+      }
+    });
     mapStatic = drawMinimapStatic();
     setView('third');
 
